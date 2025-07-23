@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "898085251418",
+    "project_id": "zerokoin-4e239",
+    "storage_bucket": "zerokoin-4e239.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:898085251418:android:1b197c8211a119611f2b63",
+        "android_client_info": {
+          "package_name": "com.example.zero_koin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "898085251418-n3gfgmipi8dvrns02al3kh45hs95sav5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.zero_koin",
+            "certificate_hash": "4b871bb5f3a8d07cd610644b8bf014f9030ff278"
+          }
+        },
+        {
+          "client_id": "898085251418-kuc3sj6fa5t2lgjgfddet3d9jsud9796.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyMWE4ueqdGT7FSWOFM-2VfmlLHduZQIQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "898085251418-kuc3sj6fa5t2lgjgfddet3d9jsud9796.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "898085251418-o69400shrkltim3b0j4qt72k0bkhu28c.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.zerokoin"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:898085251418:android:e5d9e4144565ea7e1f2b63",
+        "android_client_info": {
+          "package_name": "com.zerokoin.www"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "898085251418-teg2rfv26l10cpgaafro9rf2h1bf4bfb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zerokoin.www",
+            "certificate_hash": "4b871bb5f3a8d07cd610644b8bf014f9030ff278"
+          }
+        },
+        {
+          "client_id": "898085251418-kuc3sj6fa5t2lgjgfddet3d9jsud9796.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyMWE4ueqdGT7FSWOFM-2VfmlLHduZQIQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "898085251418-kuc3sj6fa5t2lgjgfddet3d9jsud9796.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "898085251418-o69400shrkltim3b0j4qt72k0bkhu28c.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.zerokoin"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
