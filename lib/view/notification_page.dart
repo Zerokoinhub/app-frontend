@@ -5,11 +5,13 @@ import 'package:get/get.dart';
 import 'package:zero_koin/controllers/theme_controller.dart';
 import 'package:zero_koin/controllers/notification_controller.dart';
 import 'package:zero_koin/controllers/admob_controller.dart';
+import 'package:zero_koin/view/bottom_bar.dart';
 
 import 'package:zero_koin/widgets/app_bar_container.dart';
 import 'package:zero_koin/widgets/my_drawer.dart';
 import 'package:zero_koin/widgets/notifcation_popup.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class NotificationPage extends StatelessWidget {
   const NotificationPage({super.key});
@@ -59,7 +61,8 @@ class NotificationPage extends StatelessWidget {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            Get.back();
+                            // Navigate to home screen (BottomBar with index 0)
+                            Get.offAll(() => const BottomBar(initialIndex: 0));
                           },
                           child: Image(
                             image: AssetImage("assets/arrow_back.png"),
@@ -199,25 +202,35 @@ class NotificationPage extends StatelessWidget {
                                       bottom: screenHeight * 0.02,
                                     ),
                                     child: GestureDetector(
-                                      onTap: () {
+                                      onTap: () async {
                                         notificationController
                                             .onNotificationTap(notification);
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return BackdropFilter(
-                                              filter: ImageFilter.blur(
-                                                sigmaX: 5.0,
-                                                sigmaY: 5.0,
-                                              ),
-                                              child: Dialog(
-                                                backgroundColor:
-                                                    Colors.transparent,
-                                                child: NotifcationPopup(),
-                                              ),
-                                            );
-                                          },
-                                        );
+
+                                        // If a link is provided by API, open it
+                                        if (notification.link.trim().isNotEmpty) {
+                                          final Uri uri = Uri.parse(notification.link.trim());
+                                          if (await canLaunchUrl(uri)) {
+                                            await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                          }
+                                        } else {
+                                          // Fallback: show existing popup if no link
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return BackdropFilter(
+                                                filter: ImageFilter.blur(
+                                                  sigmaX: 5.0,
+                                                  sigmaY: 5.0,
+                                                ),
+                                                child: Dialog(
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  child: NotifcationPopup(),
+                                                ),
+                                              );
+                                            },
+                                          );
+                                        }
                                       },
                                       child: Container(
                                         width: double.infinity,
@@ -344,6 +357,13 @@ class NotificationPage extends StatelessWidget {
                                                     ),
                                                   ],
                                                 ),
+                                              ),
+                                              SizedBox(width: 8),
+                                              Icon(
+                                                Icons.chevron_right,
+                                                size: 22,
+                                                color: themeController.textColor
+                                                    .withValues(alpha: 0.7),
                                               ),
                                             ],
                                           ),

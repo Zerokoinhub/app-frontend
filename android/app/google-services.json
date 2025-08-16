@@ -1,49 +1,34 @@
 {
   "project_info": {
-    "project_number": "898085251418",
-    "project_id": "zerokoin-4e239",
-    "storage_bucket": "zerokoin-4e239.firebasestorage.app"
+    "project_number": "710512977280",
+    "project_id": "zerokoin-705c5",
+    "storage_bucket": "zerokoin-705c5.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:898085251418:android:1b197c8211a119611f2b63",
+        "mobilesdk_app_id": "1:710512977280:android:b0debd15e80f6091b04d65",
         "android_client_info": {
-          "package_name": "com.example.zero_koin"
+          "package_name": "com.zerokoin.www"
         }
       },
       "oauth_client": [
         {
-          "client_id": "898085251418-n3gfgmipi8dvrns02al3kh45hs95sav5.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.zero_koin",
-            "certificate_hash": "4b871bb5f3a8d07cd610644b8bf014f9030ff278"
-          }
-        },
-        {
-          "client_id": "898085251418-kuc3sj6fa5t2lgjgfddet3d9jsud9796.apps.googleusercontent.com",
+          "client_id": "710512977280-1r07e4m09tk122ds7qgkqssu28rcj8fi.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDyMWE4ueqdGT7FSWOFM-2VfmlLHduZQIQ"
+          "current_key": "AIzaSyBO744IB8qAI9o3pGz3dMd_rtR7m4_WYVQ"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "898085251418-kuc3sj6fa5t2lgjgfddet3d9jsud9796.apps.googleusercontent.com",
+              "client_id": "710512977280-1r07e4m09tk122ds7qgkqssu28rcj8fi.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "898085251418-o69400shrkltim3b0j4qt72k0bkhu28c.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.zerokoin"
-              }
             }
           ]
         }
@@ -51,43 +36,36 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:898085251418:android:e5d9e4144565ea7e1f2b63",
+        "mobilesdk_app_id": "1:710512977280:android:abb8b239ba4bf871b04d65",
         "android_client_info": {
-          "package_name": "com.zerokoin.www"
+          "package_name": "com.zerokoin.zerokoinapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "898085251418-teg2rfv26l10cpgaafro9rf2h1bf4bfb.apps.googleusercontent.com",
+          "client_id": "710512977280-bio7s17f7kd1i472hgie4iqqe409vp5o.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.zerokoin.www",
+            "package_name": "com.zerokoin.zerokoinapp",
             "certificate_hash": "4b871bb5f3a8d07cd610644b8bf014f9030ff278"
           }
         },
         {
-          "client_id": "898085251418-kuc3sj6fa5t2lgjgfddet3d9jsud9796.apps.googleusercontent.com",
+          "client_id": "710512977280-1r07e4m09tk122ds7qgkqssu28rcj8fi.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDyMWE4ueqdGT7FSWOFM-2VfmlLHduZQIQ"
+          "current_key": "AIzaSyBO744IB8qAI9o3pGz3dMd_rtR7m4_WYVQ"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "898085251418-kuc3sj6fa5t2lgjgfddet3d9jsud9796.apps.googleusercontent.com",
+              "client_id": "710512977280-1r07e4m09tk122ds7qgkqssu28rcj8fi.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "898085251418-o69400shrkltim3b0j4qt72k0bkhu28c.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.zerokoin"
-              }
             }
           ]
         }

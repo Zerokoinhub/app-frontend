@@ -68,7 +68,7 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
       // Listen to changes in the selected course and reset timer
       _courseWorker = ever(_courseController.currentCourse, (callback) {
         if (mounted) {
-          _resetTimer(); // This will now use the course's time
+          _resetTimerForNewCourse(); // This will reset to first page with correct time
           _translateCourseContent();
         }
       });
@@ -85,7 +85,7 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
 
       // Initial translation and timer setup
       _translateCourseContent();
-      _resetTimer(); // Set initial timer based on current course
+      _resetTimerForNewCourse(); // Set initial timer based on current course
     });
   }
 
@@ -247,14 +247,15 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
 
   // New method to reset the timer state
   void _resetTimer() {
-    // Get the time from the current course's first page
+    // Get the time from the current page of the current course
     final course = _courseController.currentCourse.value;
     int timerSeconds = 120; // Default 2 minutes
 
     if (course != null &&
         course.pages.isNotEmpty &&
-        course.pages[0].time != null) {
-      timerSeconds = _parseTimeToSeconds(course.pages[0].time);
+        _currentPageIndex < course.pages.length &&
+        course.pages[_currentPageIndex].time != null) {
+      timerSeconds = _parseTimeToSeconds(course.pages[_currentPageIndex].time);
     }
 
     setState(() {
@@ -262,9 +263,17 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
       _isTimerRunning = false;
       _isTimerPaused = false;
       _timer?.cancel();
-      _currentPageIndex = 0; // Reset page index when course changes
+      // Don't reset page index here when just resetting timer for current page
     });
     _translateCourseContent();
+  }
+
+  // Method to reset timer when course changes (resets to first page)
+  void _resetTimerForNewCourse() {
+    setState(() {
+      _currentPageIndex = 0; // Reset page index when course changes
+    });
+    _resetTimer();
   }
 
   Future<void> _loadTranslatedCourseNames() async {
@@ -973,7 +982,7 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                     ),
                                     const Spacer(), // Added const
                                     GestureDetector(
-                                      onTap: () {
+                                      onTap: _remainingSeconds == 0 ? null : () {
                                         if (!_isTimerRunning &&
                                             !_isTimerPaused) {
                                           _startTimer();
@@ -990,16 +999,20 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                           borderRadius: BorderRadius.circular(
                                             10,
                                           ),
-                                          color: const Color(
-                                            0xFF393746,
-                                          ), // Changed to const Color
+                                          color: _remainingSeconds == 0 
+                                              ? Colors.grey.withOpacity(0.5)
+                                              : const Color(0xFF393746),
                                         ),
                                         child: Center(
                                           child: Icon(
-                                            _isTimerRunning
-                                                ? Icons.pause_circle_outline
-                                                : Icons.play_circle_outline,
-                                            color: Colors.white,
+                                            _remainingSeconds == 0
+                                                ? Icons.check_circle_outline
+                                                : (_isTimerRunning
+                                                    ? Icons.pause_circle_outline
+                                                    : Icons.play_circle_outline),
+                                            color: _remainingSeconds == 0 
+                                                ? Colors.grey
+                                                : Colors.white,
                                             size: 25,
                                           ),
                                         ),
@@ -1031,18 +1044,12 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                       ), // Added const
                                     ),
                                     onPressed: () {
-                                      setState(() {
-                                        if (_currentPageIndex > 0) {
+                                      if (_currentPageIndex > 0) {
+                                        setState(() {
                                           _currentPageIndex--;
-                                          _remainingSeconds =
-                                              120; // Reset timer
-                                          _isTimerRunning = false;
-                                          _isTimerPaused = false;
-                                          _timer
-                                              ?.cancel(); // Cancel any running timer
-                                        }
-                                      });
-                                      _translateCourseContent();
+                                        });
+                                        _resetTimer(); // Reset timer with correct page duration
+                                      }
                                     },
                                     child: Obx(
                                       () => Text(
@@ -1083,25 +1090,18 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                               print(
                                                 "Next button pressed - Timer completed!",
                                               );
-                                              setState(() {
-                                                final course =
-                                                    _courseController
-                                                        .currentCourse
-                                                        .value;
-                                                if (course != null &&
-                                                    _currentPageIndex <
-                                                        course.pages.length -
-                                                            1) {
+                                              final course =
+                                                  _courseController
+                                                      .currentCourse
+                                                      .value;
+                                              if (course != null &&
+                                                  _currentPageIndex <
+                                                      course.pages.length - 1) {
+                                                setState(() {
                                                   _currentPageIndex++;
-                                                  _remainingSeconds =
-                                                      120; // Reset timer
-                                                  _isTimerRunning = false;
-                                                  _isTimerPaused = false;
-                                                  _timer
-                                                      ?.cancel(); // Cancel any running timer
-                                                }
-                                              });
-                                              _translateCourseContent();
+                                                });
+                                                _resetTimer(); // Reset timer with correct page duration
+                                              }
                                             }
                                             : null,
                                     child: Obx(

@@ -6,7 +6,7 @@ import 'package:zero_koin/widgets/guide_text.dart';
 import 'package:zero_koin/widgets/my_drawer.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:zero_koin/view/home_screen.dart';
+import 'package:zero_koin/view/bottom_bar.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -40,7 +40,8 @@ class GuideScreen extends StatelessWidget {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            Get.back();
+                            // Navigate to home screen (BottomBar with index 0)
+                            Get.offAll(() => const BottomBar(initialIndex: 0));
                           },
                           child: Image(
                             image: AssetImage("assets/arrow_back.png"),

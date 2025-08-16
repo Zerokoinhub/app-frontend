@@ -13,8 +13,8 @@ class AuthService extends GetxController {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    serverClientId:
-        '898085251418-kuc3sj6fa5t2lgjgfddet3d9jsud9796.apps.googleusercontent.com',
+    // Remove serverClientId for Android - let it use the one from google-services.json
+    // serverClientId is mainly needed for iOS
   );
 
   // Observable user state
@@ -138,18 +138,38 @@ class AuthService extends GetxController {
     } catch (e) {
       Get.back(); // Close loading dialog if open
 
+      String errorMessage = 'Failed to sign in with Google';
+      
+      // Provide more specific error messages
+      if (e.toString().contains('network_error')) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (e.toString().contains('sign_in_canceled')) {
+        errorMessage = 'Sign-in was canceled.';
+      } else if (e.toString().contains('sign_in_failed')) {
+        errorMessage = 'Google Sign-in failed. Please try again.';
+      } else if (e.toString().contains('account-exists-with-different-credential')) {
+        errorMessage = 'An account already exists with a different sign-in method.';
+      }
+
       // Show error message
       Get.snackbar(
         'Error',
-        'Failed to sign in with Google: ${e.toString()}',
+        errorMessage,
         snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 3),
+        duration: const Duration(seconds: 5),
+        backgroundColor: Colors.red,
         colorText: Colors.white,
       );
 
-      // Log error for debugging
+      // Log detailed error for debugging
       if (Get.isLogEnable) {
-        print('Google Sign-In Error: $e');
+        print('🚨 Google Sign-In Error Details:');
+        print('   Error: $e');
+        print('   Error Type: ${e.runtimeType}');
+        if (e is FirebaseAuthException) {
+          print('   Firebase Error Code: ${e.code}');
+          print('   Firebase Error Message: ${e.message}');
+        }
       }
       return null;
     }

@@ -81,6 +81,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeController themeController = Get.find<ThemeController>();
+    // Notify NotificationService when first frame is rendered so it can
+    // process any pending notification tap that launched the app
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        final notificationService = Get.find<NotificationService>();
+        notificationService.onAppReady();
+      } catch (e) {
+        // ignore if service not available
+      }
+    });
 
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,

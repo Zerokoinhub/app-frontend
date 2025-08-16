@@ -44,7 +44,7 @@ class AdMobController extends GetxController {
         },
         onAdFailedToLoad: (ad, err) {
           print('Failed to load a banner ad: ${err.message}');
-          isBannerAdReady.value = false;
+          isBannerAdReady.value = true; // Set to true to prevent blocking splash screen
           ad.dispose();
         },
       ),
@@ -64,7 +64,7 @@ class AdMobController extends GetxController {
         },
         onAdFailedToLoad: (ad, err) {
           print('Failed to load a learn and earn banner ad: ${err.message}');
-          isLearnAndEarnBannerAdReady.value = false;
+          isLearnAndEarnBannerAdReady.value = true; // Set to true to prevent blocking splash screen
           ad.dispose();
         },
       ),
@@ -84,7 +84,7 @@ class AdMobController extends GetxController {
         },
         onAdFailedToLoad: (ad, err) {
           print('Failed to load a notification banner ad: ${err.message}');
-          isNotificationBannerAdReady.value = false;
+          isNotificationBannerAdReady.value = true; // Set to true to prevent blocking splash screen
           ad.dispose();
         },
       ),

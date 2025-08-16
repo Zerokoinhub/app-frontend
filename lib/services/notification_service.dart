@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import '../controllers/user_controller.dart';
 import '../controllers/notification_controller.dart';
+import '../view/notification_page.dart';
 
 class NotificationService extends GetxService {
   static final NotificationService _instance = NotificationService._internal();
@@ -14,6 +17,10 @@ class NotificationService extends GetxService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
+  
+  // Tracks whether UI is ready to handle navigation
+  bool _appReady = false;
+  NotificationResponse? _pendingStartupResponse;
 
   // Notification channel for Android
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
@@ -108,6 +115,7 @@ class NotificationService extends GetxService {
     await _localNotifications.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: _onNotificationTapped,
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
 
     // Create notification channel for Android
@@ -117,6 +125,20 @@ class NotificationService extends GetxService {
             AndroidFlutterLocalNotificationsPlugin
           >()
           ?.createNotificationChannel(_channel);
+    }
+
+    // If the app was launched by tapping a notification/action while it was
+    // terminated, handle it here on startup
+    try {
+      final NotificationAppLaunchDetails? launchDetails =
+          await _localNotifications.getNotificationAppLaunchDetails();
+      if (launchDetails?.didNotificationLaunchApp ?? false) {
+        // Defer handling until after UI is ready to avoid navigator errors
+        _pendingStartupResponse = launchDetails!.notificationResponse;
+        print('Stored pending notification response for startup handling');
+      }
+    } catch (e) {
+      print('Error reading notification app launch details: $e');
     }
   }
 
@@ -142,8 +164,30 @@ class NotificationService extends GetxService {
     }
   }
 
+  // Should be called once the app UI is ready (after first frame)
+  void onAppReady() {
+    if (_appReady) return;
+    _appReady = true;
+    if (_pendingStartupResponse != null) {
+      try {
+        _onNotificationTapped(_pendingStartupResponse!);
+      } catch (e) {
+        print('Error handling pending startup notification: $e');
+      } finally {
+        _pendingStartupResponse = null;
+      }
+    }
+  }
+
   void _handleForegroundMessage(RemoteMessage message) {
     print('Received foreground message: ${message.messageId}');
+    print('Message data: ${message.data}');
+
+    // Check if the message supports action buttons
+    bool hasActions = message.data.containsKey('action_open') && 
+                     message.data.containsKey('action_dismiss');
+    
+    print('Has action buttons: $hasActions');
 
     // Check if this is an admin notification
     final notificationType = message.data['type'];
@@ -157,12 +201,21 @@ class NotificationService extends GetxService {
         title: message.notification?.title ?? 'ZeroKoin',
         body: message.notification?.body ?? 'You have a new notification',
         payload: message.data.toString(),
+        imageUrl: message.data['image'],
+        includeActions: hasActions,
       );
     }
   }
 
   void _handleAdminNotification(RemoteMessage message) {
     print('Received admin notification: ${message.messageId}');
+    print('Admin notification data: ${message.data}');
+
+    // Check if the message supports action buttons
+    bool hasActions = message.data.containsKey('action_open') && 
+                     message.data.containsKey('action_dismiss');
+    
+    print('Admin notification has action buttons: $hasActions');
 
     // Show local notification for admin notification
     _showLocalNotification(
@@ -172,6 +225,8 @@ class NotificationService extends GetxService {
           message.data['description'] ??
           'You have a new notification',
       payload: message.data.toString(),
+      imageUrl: message.data['image'],
+      includeActions: hasActions,
     );
 
     // Refresh notifications in the notification controller if available
@@ -191,8 +246,129 @@ class NotificationService extends GetxService {
   }
 
   void _onNotificationTapped(NotificationResponse response) {
-    print('Local notification tapped: ${response.payload}');
-    // Handle local notification tap
+    print('🔔 Local notification tapped: ${response.payload}');
+    print('🔔 Action ID: ${response.actionId}');
+    print('🔔 Notification ID: ${response.id}');
+    print('🔔 Input: ${response.input}');
+    
+    // Handle action button clicks
+    if (response.actionId != null) {
+      print('🔔 Processing action button: ${response.actionId}');
+      _handleNotificationAction(
+        response.actionId!,
+        response.payload,
+        response.id,
+      );
+    } else {
+      print('🔔 Processing regular notification tap');
+      // Handle regular notification tap
+      _handleRegularNotificationTap(response.payload);
+    }
+  }
+
+  // Handle action button clicks
+  void _handleNotificationAction(String actionId, String? payload, int? notificationId) {
+    print('Notification action triggered: $actionId');
+    
+    switch (actionId) {
+      case 'open':
+        print('Open action triggered');
+        _handleOpenAction(payload);
+        // Cancel the notification after opening
+        try {
+          if (notificationId != null) {
+            _localNotifications.cancel(notificationId);
+          }
+        } catch (e) {
+          print('Failed to cancel notification after open: $e');
+        }
+        break;
+      case 'dismiss':
+        print('Dismiss action triggered');
+        _handleDismissAction(payload);
+        // Dismiss action auto-cancels due to cancelNotification: true
+        break;
+      default:
+        print('Unknown action: $actionId');
+        break;
+    }
+  }
+
+  // Handle open action
+  void _handleOpenAction(String? payload) {
+    print('🚀 Opening app from notification action');
+    print('🚀 Payload: $payload');
+    print('🚀 App ready status: $_appReady');
+    
+    // Try to navigate to notification page or relevant screen
+    try {
+      print('🚀 Attempting navigation to NotificationPage');
+      // Use Get.offAll to ensure we navigate properly even from terminated state
+      Get.offAll(() => const NotificationPage());
+      print('🚀 Navigation command executed successfully');
+    } catch (e) {
+      print('❌ Navigation error: $e');
+      // Fallback: just refresh notifications
+      _refreshNotificationController();
+    }
+  }
+
+  // Handle dismiss action
+  void _handleDismissAction(String? payload) {
+    print('Dismissing notification');
+    
+    // Parse payload to get notification ID if available
+    if (payload != null) {
+      try {
+        // Try to extract notification ID from payload and mark as read
+        // This is optional - you might want to implement this based on your needs
+        print('Notification dismissed: $payload');
+      } catch (e) {
+        print('Error parsing payload for dismiss action: $e');
+      }
+    }
+    
+    // Just refresh the notification count
+    _refreshNotificationController();
+  }
+
+  // Handle regular notification tap (no action button)
+  void _handleRegularNotificationTap(String? payload) {
+    print('Regular notification tap');
+    _handleOpenAction(payload); // Same as open action
+  }
+
+  // Helper method to refresh notification controller
+  void _refreshNotificationController() {
+    try {
+      final notificationController = Get.find<NotificationController>();
+      notificationController.fetchNotificationsWithReadStatus();
+      notificationController.fetchUnreadCount();
+    } catch (e) {
+      print('NotificationController not found: $e');
+    }
+  }
+
+  // Helper method to download image for notifications
+  Future<Uint8List?> _downloadImage(String imageUrl) async {
+    try {
+      print('📥 Downloading image for notification: $imageUrl');
+      final response = await http.get(
+        Uri.parse(imageUrl),
+        headers: {'User-Agent': 'ZeroKoin/1.0'},
+      ).timeout(const Duration(seconds: 10));
+      
+      if (response.statusCode == 200) {
+        print('✅ Image downloaded successfully, size: ${response.bodyBytes.length} bytes');
+        return response.bodyBytes;
+      } else {
+        print('❌ Failed to download image, status: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('❌ Error downloading image: $e');
+      return null;
+    }
   }
 
   // Show local notification
@@ -200,8 +376,71 @@ class NotificationService extends GetxService {
     required String title,
     required String body,
     String? payload,
+    String? imageUrl,
+    bool includeActions = false,
   }) async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    print('Showing local notification with includeActions: $includeActions');
+    print('Image URL provided: $imageUrl');
+    
+    // Define action buttons
+    List<AndroidNotificationAction> actions = [];
+    if (includeActions) {
+      actions = [
+        AndroidNotificationAction(
+          'open',
+          'Open',
+          contextual: false,
+          cancelNotification: false, // Don't auto-cancel, let us handle it
+          showsUserInterface: true, // This action should open the app
+        ),
+        AndroidNotificationAction(
+          'dismiss',
+          'Dismiss',
+          contextual: false,
+          cancelNotification: true, // Auto-cancel for dismiss
+          showsUserInterface: false,
+        ),
+      ];
+    }
+
+    // Prepare large icon and style for Android notifications
+    AndroidBitmap<Object> largeIcon = const DrawableResourceAndroidBitmap('@mipmap/ic_launcher');
+    StyleInformation styleInformation = BigTextStyleInformation(
+      body,
+      htmlFormatBigText: false,
+      contentTitle: title,
+      htmlFormatContentTitle: false,
+    );
+    
+    // Try to download and set notification image
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      try {
+        final imageBytes = await _downloadImage(imageUrl);
+        if (imageBytes != null) {
+          final bigPictureImage = ByteArrayAndroidBitmap(imageBytes);
+          final largeIconImage = ByteArrayAndroidBitmap(imageBytes);
+          
+          // Use BigPictureStyleInformation for rich image notifications
+          styleInformation = BigPictureStyleInformation(
+            bigPictureImage,
+            largeIcon: largeIconImage,
+            contentTitle: title,
+            htmlFormatContentTitle: false,
+            summaryText: body,
+            htmlFormatSummaryText: false,
+          );
+          
+          largeIcon = largeIconImage;
+          print('✅ Configured notification with downloaded image');
+        } else {
+          print('⚠️ Failed to download image, using default notification style');
+        }
+      } catch (e) {
+        print('❌ Error processing notification image: $e');
+      }
+    }
+
+    final AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
           'zerokoin_notifications',
           'ZeroKoin Notifications',
@@ -210,8 +449,12 @@ class NotificationService extends GetxService {
           priority: Priority.high,
           showWhen: true,
           icon: '@drawable/ic_stat_notificationlogo',
-          largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
-          color: Color(0xFF0682A2), // App's primary color
+          largeIcon: largeIcon,
+          color: const Color(0xFF0682A2), // App's primary color
+          actions: includeActions ? actions : null,
+          category: AndroidNotificationCategory.message,
+          styleInformation: styleInformation,
+          autoCancel: false, // Don't auto-cancel on tap, let action buttons handle it
         );
 
     const DarwinNotificationDetails iOSPlatformChannelSpecifics =
@@ -219,9 +462,10 @@ class NotificationService extends GetxService {
           presentAlert: true,
           presentBadge: true,
           presentSound: true,
+          categoryIdentifier: 'ZEROKOIN_CATEGORY',
         );
 
-    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+    final NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
       iOS: iOSPlatformChannelSpecifics,
     );
@@ -236,10 +480,11 @@ class NotificationService extends GetxService {
   }
 
   // Public method to show session unlocked notification
-  Future<void> showSessionUnlockedNotification() async {
+  Future<void> showSessionUnlockedNotification({bool includeActions = true}) async {
     await _showLocalNotification(
       title: 'ZeroKoin',
       body: 'Session unlocked! Complete the session to claim 30 Zero Koins.',
+      includeActions: includeActions,
     );
   }
 
@@ -249,11 +494,14 @@ class NotificationService extends GetxService {
     required String body,
     String? imageUrl,
     Map<String, String>? data,
+    bool includeActions = true,
   }) async {
     await _showLocalNotification(
       title: title,
       body: body,
       payload: data?.toString(),
+      imageUrl: imageUrl,
+      includeActions: includeActions,
     );
   }
 
@@ -325,6 +573,109 @@ class NotificationService extends GetxService {
 
 // Background message handler (must be top-level function)
 @pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse response) {
+  // This is invoked when a notification action is tapped while the app is in
+  // the background or terminated. Avoid heavy work here; just log/cancel.
+  try {
+    print('🌙 BG notification response. actionId=${response.actionId}, id=${response.id}');
+    print('🌙 Background payload: ${response.payload}');
+    print('🌙 Background input: ${response.input}');
+    // Nothing else to do here. If the action opens the app, the foreground
+    // handler in `_onNotificationTapped` will run after launch.
+  } catch (e) {
+    print('❌ Error in background notification tap handler: $e');
+  }
+}
+
+@pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('Handling background message: ${message.messageId}');
+  try {
+    // Show a local notification with actions when we get a data-only message
+    final plugin = FlutterLocalNotificationsPlugin();
+
+    // Determine if actions are present
+    final hasActions = message.data.containsKey('action_open') &&
+        message.data.containsKey('action_dismiss');
+
+    // Try to download and configure image for background notification
+    AndroidBitmap<Object> largeIcon = const DrawableResourceAndroidBitmap('@mipmap/ic_launcher');
+    StyleInformation styleInformation = const BigTextStyleInformation('');
+    
+    final imageUrl = message.data['image'];
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      try {
+        final response = await http.get(
+          Uri.parse(imageUrl),
+          headers: {'User-Agent': 'ZeroKoin/1.0'},
+        ).timeout(const Duration(seconds: 5));
+        
+        if (response.statusCode == 200) {
+          final imageBytes = response.bodyBytes;
+          final bigPictureImage = ByteArrayAndroidBitmap(imageBytes);
+          final largeIconImage = ByteArrayAndroidBitmap(imageBytes);
+          
+          styleInformation = BigPictureStyleInformation(
+            bigPictureImage,
+            largeIcon: largeIconImage,
+            contentTitle: message.data['title'] ?? 'ZeroKoin',
+            summaryText: message.data['body'] ?? 'You have a new notification',
+          );
+          
+          largeIcon = largeIconImage;
+          print('✅ Background notification configured with image');
+        }
+      } catch (e) {
+        print('❌ Error loading background notification image: $e');
+      }
+    }
+
+    final androidDetails = AndroidNotificationDetails(
+      'zerokoin_notifications',
+      'ZeroKoin Notifications',
+      channelDescription: 'Notifications for ZeroKoin app',
+      importance: Importance.high,
+      priority: Priority.high,
+      showWhen: true,
+      icon: '@drawable/ic_stat_notificationlogo',
+      largeIcon: largeIcon,
+      color: const Color(0xFF0682A2),
+      actions: hasActions
+          ? const [
+              AndroidNotificationAction(
+                'open', 
+                'Open', 
+                cancelNotification: false,
+                showsUserInterface: true,
+              ),
+              AndroidNotificationAction(
+                'dismiss', 
+                'Dismiss', 
+                cancelNotification: true,
+                showsUserInterface: false,
+              ),
+            ]
+          : null,
+      category: AndroidNotificationCategory.message,
+      styleInformation: styleInformation,
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+      categoryIdentifier: 'ZEROKOIN_CATEGORY',
+    );
+
+    final details = NotificationDetails(android: androidDetails, iOS: iosDetails);
+    await plugin.show(
+      DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      message.data['title'] ?? 'ZeroKoin',
+      message.data['body'] ?? 'You have a new notification',
+      details,
+      payload: message.data.toString(),
+    );
+  } catch (e) {
+    print('Background notification error: $e');
+  }
 }

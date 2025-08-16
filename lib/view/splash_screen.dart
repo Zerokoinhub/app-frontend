@@ -68,18 +68,46 @@ class _SplashScreenState extends State<SplashScreen>
     // Initialize and wait for time validation
     final timeValidationReady = _initializeTimeValidation();
 
-    // Wait for minimum duration, ads, and time validation
-    Future.wait([minimumDuration, adsLoaded, timeValidationReady]).then((_) {
+    // Add absolute maximum timeout as a safety net (20 seconds total)
+    final maxTimeout = Future.delayed(const Duration(seconds: 20)).then((_) {
+      print('⚠️ Maximum splash screen timeout reached - forcing navigation');
+    });
+
+    // Wait for minimum duration, ads, and time validation, or maximum timeout
+    Future.any([
+      Future.wait([minimumDuration, adsLoaded, timeValidationReady]),
+      maxTimeout,
+    ]).then((_) {
       _checkAuthAndNavigate();
     });
   }
 
   Future<void> _waitForAllAdsToLoad() async {
-    // Wait for all three banner ads to load
+    // Wait for all three banner ads to load with timeout
+    const maxWaitTime = Duration(seconds: 10); // Maximum wait time for ads
+    const checkInterval = Duration(milliseconds: 100);
+    final startTime = DateTime.now();
+
     while (!_adMobController.isBannerAdReady.value ||
         !_adMobController.isLearnAndEarnBannerAdReady.value ||
         !_adMobController.isNotificationBannerAdReady.value) {
-      await Future.delayed(const Duration(milliseconds: 100));
+
+      // Check if we've exceeded the maximum wait time
+      if (DateTime.now().difference(startTime) > maxWaitTime) {
+        print('⚠️ Ad loading timeout reached, proceeding without all ads loaded');
+        print('Banner ad ready: ${_adMobController.isBannerAdReady.value}');
+        print('Learn & Earn ad ready: ${_adMobController.isLearnAndEarnBannerAdReady.value}');
+        print('Notification ad ready: ${_adMobController.isNotificationBannerAdReady.value}');
+        break;
+      }
+
+      await Future.delayed(checkInterval);
+    }
+
+    if (_adMobController.isBannerAdReady.value &&
+        _adMobController.isLearnAndEarnBannerAdReady.value &&
+        _adMobController.isNotificationBannerAdReady.value) {
+      print('✅ All banner ads loaded successfully');
     }
   }
 
@@ -90,14 +118,15 @@ class _SplashScreenState extends State<SplashScreen>
 
       // Wait for initialization with timeout
       await timeValidationService.waitForInitialization().timeout(
-        const Duration(seconds: 10),
+        const Duration(seconds: 5), // Reduced timeout to 5 seconds
         onTimeout: () {
-          print('Time validation initialization timeout in splash screen');
+          print('⚠️ Time validation initialization timeout in splash screen - proceeding anyway');
         },
       );
-      print('Time validation initialized successfully in splash screen');
+      print('✅ Time validation initialized successfully in splash screen');
     } catch (e) {
-      print('Error initializing time validation in splash screen: $e');
+      print('⚠️ Error initializing time validation in splash screen: $e - proceeding anyway');
+      // Don't rethrow the error - let the app continue
     }
   }
 
