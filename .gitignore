@@ -43,3 +43,27 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Additional Android build files
+**/android/**/gradle-wrapper.jar
+**/android/.gradle
+**/android/captures/
+**/android/gradlew
+**/android/gradlew.bat
+**/android/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+
+# Additional build directories
+**/app/intermediates/
+**/app/outputs/
+**/app/build/
+**/android/app/build/
+
+# Flutter build artifacts
+**/flutter_assets/
+**/kernel_blob.bin
+
+# Large binary files
+*.apk
+*.so
+*.aab
