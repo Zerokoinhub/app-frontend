@@ -67,3 +67,8 @@ app.*.map.json
 *.apk
 *.so
 *.aab
+
+# Firebase credentials and sensitive files
+*firebase-adminsdk*.json
+*.json.key
+*service-account*.json
