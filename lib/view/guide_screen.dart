@@ -156,7 +156,7 @@ class GuideScreen extends StatelessWidget {
                               text: "Tap the \"Claim\" button.",
                             ),
                             buildImageCard(
-                              imagePath: "assets/guide_4.png",
+                              imagePath: "assets/earned_sessioned.png",
                               text: "You Earned 30 ZRK",
                             ),
                             SizedBox(height: 20),

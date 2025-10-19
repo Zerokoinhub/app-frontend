@@ -29,10 +29,10 @@ void main() async {
       developer.log('Adapter status for $key: ${value.description}');
     });
   });
-  RequestConfiguration configuration = RequestConfiguration(
-    testDeviceIds: ['YOUR_DEVICE_ID'],
-  );
-  MobileAds.instance.updateRequestConfiguration(configuration);
+  // RequestConfiguration configuration = RequestConfiguration(
+  //   testDeviceIds: ['YOUR_DEVICE_ID'],
+  // );
+  // MobileAds.instance.updateRequestConfiguration(configuration);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // Initialize AdMob
   await AdMobService.initialize();

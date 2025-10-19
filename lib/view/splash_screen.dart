@@ -250,11 +250,11 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Learn and Earn Crypto',
+                  'Tap Learn & Earn',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

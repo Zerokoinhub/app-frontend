@@ -21,7 +21,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadtestDeviceAds();
+    // _loadtestDeviceAds();
 
     // Initialize transaction controller - use Get.find if exists, otherwise create new
     if (Get.isRegistered<TransactionController>()) {
@@ -44,25 +44,25 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     });
   }
 
-  Future<void> _loadtestDeviceAds() async {
-    RequestConfiguration requestConfiguration = RequestConfiguration(
-      testDeviceIds: ['7BBFE05555556F981578D2707A0885E3'],
-    );
-    await MobileAds.instance.updateRequestConfiguration(requestConfiguration);
+  // Future<void> _loadtestDeviceAds() async {
+  //   RequestConfiguration requestConfiguration = RequestConfiguration(
+  //     testDeviceIds: ['7BBFE05555556F981578D2707A0885E3'],
+  //   );
+  //   await MobileAds.instance.updateRequestConfiguration(requestConfiguration);
 
-    developer.log("✅ Test device ads loaded");
-  }
+  //   developer.log("✅ Test device ads loaded");
+  // }
 
   /// 🧠 Opens the Ad Inspector and listens for errors
-  void openAdInspector() {
-    MobileAds.instance.openAdInspector((error) {
-      if (error != null) {
-        developer.log("❌ Failed to open Ad Inspector: ${error.message}");
-      } else {
-        developer.log("✅ Ad Inspector closed successfully (no errors)");
-      }
-    });
-  }
+  // void openAdInspector() {
+  //   MobileAds.instance.openAdInspector((error) {
+  //     if (error != null) {
+  //       developer.log("❌ Failed to open Ad Inspector: ${error.message}");
+  //     } else {
+  //       developer.log("✅ Ad Inspector closed successfully (no errors)");
+  //     }
+  //   });
+  // }
 
   void _waitAndShowAd() {
     // Check if ad is ready, if not wait and check again
@@ -129,12 +129,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   ],
                 ),
               ),
-              ElevatedButton(
-                onPressed: () {
-                  openAdInspector();
-                },
-                child: const Text('Open Ad Inspector'),
-              ),
+              // ElevatedButton(
+              //   onPressed: () {
+              //     openAdInspector();
+              //   },
+              //   child: const Text('Open Ad Inspector'),
+              // ),
               SizedBox(height: 32),
               Expanded(
                 child: Container(
