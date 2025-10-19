@@ -13,13 +13,13 @@ android {
 
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
         isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = "17"
     }
 
     defaultConfig {
@@ -27,7 +27,7 @@ android {
         applicationId = "com.zerokoin.zerokoinapp"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -45,6 +45,13 @@ android {
 dependencies {
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
+
+    implementation("com.google.android.gms:play-services-ads:24.6.0")
+    implementation("com.unity3d.ads:unity-ads:4.16.1")
+    implementation("com.google.ads.mediation:unity:4.16.1.0")
+    implementation("com.google.protobuf:protobuf-javalite:3.21.12")
+
+
 
     // Add the dependencies for Firebase products you want to use
     // When using the BoM, don't specify versions in Firebase dependencies

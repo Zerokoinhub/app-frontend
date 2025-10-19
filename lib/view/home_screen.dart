@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:zero_koin/controllers/theme_controller.dart';
 import 'package:zero_koin/controllers/user_controller.dart';
+import 'package:zero_koin/services/admob_service.dart';
 import 'package:zero_koin/view/invite_user_screen.dart';
 import 'package:zero_koin/view/rewards_screen.dart';
 
@@ -20,6 +21,7 @@ import 'package:zero_koin/controllers/home_controller.dart'; // Import HomeContr
 import 'package:zero_koin/controllers/session_controller.dart';
 import 'package:zero_koin/controllers/admob_controller.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'dart:developer' as developer;
 
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:math' as math;
@@ -31,6 +33,8 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
+
+    final AdMobController adMobController = Get.find<AdMobController>();
     final ThemeController themeController = Get.find<ThemeController>();
     final HomeController homeController = Get.put(
       HomeController(),
@@ -38,7 +42,6 @@ class HomeScreen extends StatelessWidget {
     final UserController userController =
         homeController
             .userController; // Access UserController via HomeController
-    final AdMobController adMobController = Get.find<AdMobController>();
 
     // Ensure status bar content is white
     SystemChrome.setSystemUIOverlayStyle(
@@ -150,54 +153,44 @@ class HomeScreen extends StatelessWidget {
                                 child: Column(
                                   children: [
                                     // AdMob Banner Ad
-                                    Obx(
-                                      () =>
-                                          adMobController.isBannerAdReady.value
-                                              ? Container(
-                                                width:
-                                                    adMobController
-                                                        .bannerAd!
-                                                        .size
-                                                        .width
-                                                        .toDouble(),
-                                                height:
-                                                    adMobController
-                                                        .bannerAd!
-                                                        .size
-                                                        .height
-                                                        .toDouble(),
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                ),
-                                                child: AdWidget(
-                                                  ad: adMobController.bannerAd!,
-                                                ),
-                                              )
-                                              : Container(
-                                                width: 320,
-                                                height: 50,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                  border: Border.all(
-                                                    color: Colors.grey
-                                                        .withAlpha(0.3.toInt()),
-                                                    width: 1,
-                                                  ),
-                                                ),
-                                                child: Center(
-                                                  child: CircularProgressIndicator(
-                                                    strokeWidth: 2,
-                                                    valueColor:
-                                                        AlwaysStoppedAnimation<
-                                                          Color
-                                                        >(Colors.blue),
-                                                  ),
-                                                ),
-                                              ),
-                                    ),
+                                    Obx(() {
+                                      final ad = adMobController.bannerAd.value;
+                                      final isReady =
+                                          adMobController.isBannerAdReady.value;
+
+                                      if (ad != null && isReady) {
+                                        return Container(
+                                          width: ad.size.width.toDouble(),
+                                          height: ad.size.height.toDouble(),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                          ),
+                                          child: AdWidget(ad: ad),
+                                        );
+                                      } else {
+                                        return Container(
+                                          width: 320,
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                            border: Border.all(
+                                              color: Colors.grey.withAlpha(80),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: const Center(
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }),
                                     SizedBox(height: 14),
                                     Obx(
                                       () => HomePageWidgets(
@@ -238,7 +231,7 @@ class HomeScreen extends StatelessWidget {
                                             },
                                           );
                                         },
-                                        title: "Total ZEROKOIN",
+                                        title: "Total ZRK",
                                         subtitle:
                                             homeController
                                                 .userController
@@ -259,7 +252,7 @@ class HomeScreen extends StatelessWidget {
                                       },
                                       title: "Invite to Friend",
                                       subtitle:
-                                          "Get 50 Zerokoin when your friend joins through your invite",
+                                          "Get 50 ZRK when your friend joins through your invite",
                                       imageURL: "assets/Invite Icon.svg",
                                       buttonImage: "assets/Vector (1).svg",
                                       buttonText: "Invite",
@@ -352,7 +345,7 @@ class HomeScreen extends StatelessWidget {
                                                           "Invite Friends & Earn ",
                                                     ),
                                                     TextSpan(
-                                                      text: "50 Zerokoin",
+                                                      text: "50 ZRK",
                                                       style: TextStyle(
                                                         fontWeight:
                                                             FontWeight.w900,
@@ -415,7 +408,7 @@ class HomeScreen extends StatelessWidget {
                                                     ),
                                                     TextSpan(
                                                       text:
-                                                          " Zerokoin every 6 hours!",
+                                                          " ZRK every 6 hours!",
                                                     ),
                                                   ],
                                                 ),
@@ -480,9 +473,7 @@ class HomeScreen extends StatelessWidget {
                                                             FontWeight.w900,
                                                       ),
                                                     ),
-                                                    TextSpan(
-                                                      text: " Zerokoin!",
-                                                    ),
+                                                    TextSpan(text: " ZRK!"),
                                                   ],
                                                 ),
                                               ),
@@ -528,9 +519,7 @@ class HomeScreen extends StatelessWidget {
                                                             FontWeight.w900,
                                                       ),
                                                     ),
-                                                    TextSpan(
-                                                      text: " ZeroKoin!",
-                                                    ),
+                                                    TextSpan(text: " ZRK!"),
                                                   ],
                                                 ),
                                               ),
@@ -642,12 +631,32 @@ class HomeScreen extends StatelessWidget {
                                                 SizedBox(
                                                   width: screenWidth * 0.03,
                                                 ),
+
                                                 Flexible(
-                                                  flex: 0,
+                                                  // child: Icon(
+                                                  //   Icons.rocket,
+                                                  //   color: Colors.white,
+                                                  //   size:
+                                                  //       screenHeight < 700
+                                                  //           ? screenHeight *
+                                                  //               0.04
+                                                  //           : screenHeight *
+                                                  //               0.05,
+                                                  // ),
                                                   child: Image.asset(
                                                     "assets/Rocket.png",
-                                                    width: screenWidth * 0.1,
-                                                    height: screenWidth * 0.1,
+                                                    width:
+                                                        screenHeight < 700
+                                                            ? screenHeight *
+                                                                0.04
+                                                            : screenHeight *
+                                                                0.05,
+                                                    height:
+                                                        screenHeight < 700
+                                                            ? screenHeight *
+                                                                0.04
+                                                            : screenHeight *
+                                                                0.05,
                                                   ),
                                                 ),
                                                 SizedBox(
@@ -661,6 +670,7 @@ class HomeScreen extends StatelessWidget {
                                                     children: [
                                                       Text(
                                                         "Launching Soon",
+                                                        maxLines: 1,
                                                         style: TextStyle(
                                                           color: Colors.white,
                                                           fontSize:

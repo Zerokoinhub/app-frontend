@@ -280,7 +280,7 @@ class _SocailMediaPagesState extends State<SocailMediaPages> {
                               ),
                             ),
                             TextSpan(
-                              text: "Get 30 Zerokoin",
+                              text: "Get 30 ZRK",
                               style: TextStyle(
                                 color: Color(0xFF00C9FF),
                                 fontSize: 16,
@@ -303,7 +303,8 @@ class _SocailMediaPagesState extends State<SocailMediaPages> {
                               ),
                               SocailMediaWidgets(
                                 imageUrl: 'assets/Discord.svg',
-                                socialMediaUrl: 'https://bit.ly/zerokoinapp',
+                                socialMediaUrl:
+                                    'https://discord.com/invite/KauZWYznV8',
                               ),
                               SocailMediaWidgets(
                                 imageUrl: 'assets/X.svg',
@@ -318,7 +319,7 @@ class _SocailMediaPagesState extends State<SocailMediaPages> {
                               SocailMediaWidgets(
                                 imageUrl: 'assets/Facebook.svg',
                                 socialMediaUrl:
-                                    'https://www.facebook.com/share/14nd5SMsBJ/',
+                                    'https://www.facebook.com/share/1B8maXwpJy/',
                               ),
                               SocailMediaWidgets(
                                 imageUrl: 'assets/Instagram.svg',

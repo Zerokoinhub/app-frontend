@@ -33,7 +33,10 @@ class RewardsScreen extends StatelessWidget {
           SingleChildScrollView(
             child: Column(
               children: [
-                AppBarContainer(color: Colors.black.withOpacity(0.6), showTotalPosition: false),
+                AppBarContainer(
+                  color: Colors.black.withOpacity(0.6),
+                  showTotalPosition: false,
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
@@ -97,7 +100,7 @@ class RewardsScreen extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      "Your Total ZeroKoins",
+                                      "Your Total ZRK",
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: screenWidth * 0.055,
@@ -107,17 +110,24 @@ class RewardsScreen extends StatelessWidget {
                                     ),
                                     SizedBox(height: 5),
                                     Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
                                       children: [
                                         Obx(() {
-                                          final userBalance = userController.balance.value;
+                                          final userBalance =
+                                              userController.balance.value;
                                           final maxBalance = 4000;
-                                          final percentage = userBalance >= maxBalance
-                                              ? 100
-                                              : (userBalance / maxBalance * 100).round();
-                                          final progress = userBalance >= maxBalance
-                                              ? 1.0
-                                              : userBalance / maxBalance;
+                                          final percentage =
+                                              userBalance >= maxBalance
+                                                  ? 100
+                                                  : (userBalance /
+                                                          maxBalance *
+                                                          100)
+                                                      .round();
+                                          final progress =
+                                              userBalance >= maxBalance
+                                                  ? 1.0
+                                                  : userBalance / maxBalance;
                                           return SizedBox(
                                             width: screenWidth * 0.2,
                                             height: screenWidth * 0.2,
@@ -131,10 +141,15 @@ class RewardsScreen extends StatelessWidget {
                                                   child: CircularProgressIndicator(
                                                     value: 1.0,
                                                     strokeWidth: 8,
-                                                    backgroundColor: Colors.transparent,
-                                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                                      Colors.grey.withOpacity(0.3),
-                                                    ),
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    valueColor:
+                                                        AlwaysStoppedAnimation<
+                                                          Color
+                                                        >(
+                                                          Colors.grey
+                                                              .withOpacity(0.3),
+                                                        ),
                                                   ),
                                                 ),
                                                 // Progress circle with gradient effect
@@ -142,21 +157,32 @@ class RewardsScreen extends StatelessWidget {
                                                   width: screenWidth * 0.2,
                                                   height: screenWidth * 0.2,
                                                   child: CustomPaint(
-                                                    painter: GradientCircularProgressPainter(
-                                                      progress: progress,
-                                                      strokeWidth: 8,
-                                                      startColor: Color(0xFF0682A2), // Cyan/Teal
-                                                      endColor: Color(0xFFC5C113), // Yellow-Green
-                                                      backgroundColor: Colors.transparent,
-                                                    ),
+                                                    painter:
+                                                        GradientCircularProgressPainter(
+                                                          progress: progress,
+                                                          strokeWidth: 8,
+                                                          startColor: Color(
+                                                            0xFF0682A2,
+                                                          ), // Cyan/Teal
+                                                          endColor: Color(
+                                                            0xFFC5C113,
+                                                          ), // Yellow-Green
+                                                          backgroundColor:
+                                                              Colors
+                                                                  .transparent,
+                                                        ),
                                                   ),
                                                 ),
                                                 Image(
                                                   image: AssetImage(
                                                     "assets/trophyy.png",
                                                   ),
-                                                  width: screenWidth * 0.12, // Adjust trophy size relative to circle
-                                                  height: screenWidth * 0.12, // Adjust trophy size relative to circle
+                                                  width:
+                                                      screenWidth *
+                                                      0.12, // Adjust trophy size relative to circle
+                                                  height:
+                                                      screenWidth *
+                                                      0.12, // Adjust trophy size relative to circle
                                                   fit: BoxFit.contain,
                                                 ),
                                               ],
@@ -170,7 +196,7 @@ class RewardsScreen extends StatelessWidget {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                "${userController.balance.value} Coins",
+                                                "${userController.balance.value} ZRK",
                                                 style: TextStyle(
                                                   color: Colors.white,
                                                   fontSize: screenWidth * 0.055,
@@ -180,7 +206,7 @@ class RewardsScreen extends StatelessWidget {
                                               ),
                                               const SizedBox(height: 4),
                                               Text(
-                                                "Once you reach 4000 ZeroKoins, you'll be eligible to make a withdrawal.",
+                                                "Once you reach 4000 ZRK, you'll be eligible to make a withdrawal.",
                                                 style: TextStyle(
                                                   color: Colors.white,
                                                   fontSize: screenWidth * 0.03,
@@ -245,7 +271,9 @@ class RewardsScreen extends StatelessWidget {
                               SizedBox(height: 20),
                               RewardsWidget(
                                 onPressed: () {
-                                  Get.to(() => const BottomBar(initialIndex: 2));
+                                  Get.to(
+                                    () => const BottomBar(initialIndex: 2),
+                                  );
                                 },
                                 imageUrl: "assets/Group.svg",
                                 title: "Learn and Earn Daily",

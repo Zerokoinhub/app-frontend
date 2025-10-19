@@ -406,50 +406,47 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                     ),
                     const SizedBox(height: 15),
                     // AdMob Banner Ad for Learn and Earn
-                    Obx(
-                      () =>
-                          _adMobController.isLearnAndEarnBannerAdReady.value
-                              ? Container(
-                                width:
-                                    _adMobController
-                                        .learnAndEarnBannerAd!
-                                        .size
-                                        .width
-                                        .toDouble(),
-                                height:
-                                    _adMobController
-                                        .learnAndEarnBannerAd!
-                                        .size
-                                        .height
-                                        .toDouble(),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: AdWidget(
-                                  ad: _adMobController.learnAndEarnBannerAd!,
-                                ),
-                              )
-                              : Container(
-                                width: 320,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: Colors.grey.withAlpha(0.3.toInt()),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.blue,
-                                    ),
-                                  ),
-                                ),
+                    Obx(() {
+                      final ad = _adMobController.learnAndEarnBannerAd;
+                      final isReady =
+                          _adMobController.isLearnAndEarnBannerAdReady.value;
+
+                      if (isReady && ad != null) {
+                        // ✅ Ad is loaded, show AdWidget
+                        return Container(
+                          width: ad.size.width.toDouble(),
+                          height: ad.size.height.toDouble(),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: AdWidget(ad: ad),
+                        );
+                      } else {
+                        // ❌ Ad not loaded yet, show placeholder
+                        return Container(
+                          width: 320,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: Colors.grey.withAlpha(
+                                77,
+                              ), // same as 0.3.toInt()
+                              width: 1,
+                            ),
+                          ),
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.blue,
                               ),
-                    ),
+                            ),
+                          ),
+                        );
+                      }
+                    }),
                   ],
                 ),
               ),
@@ -982,16 +979,19 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                     ),
                                     const Spacer(), // Added const
                                     GestureDetector(
-                                      onTap: _remainingSeconds == 0 ? null : () {
-                                        if (!_isTimerRunning &&
-                                            !_isTimerPaused) {
-                                          _startTimer();
-                                        } else if (_isTimerRunning) {
-                                          _pauseTimer();
-                                        } else if (_isTimerPaused) {
-                                          _resumeTimer();
-                                        }
-                                      },
+                                      onTap:
+                                          _remainingSeconds == 0
+                                              ? null
+                                              : () {
+                                                if (!_isTimerRunning &&
+                                                    !_isTimerPaused) {
+                                                  _startTimer();
+                                                } else if (_isTimerRunning) {
+                                                  _pauseTimer();
+                                                } else if (_isTimerPaused) {
+                                                  _resumeTimer();
+                                                }
+                                              },
                                       child: Container(
                                         height: 45,
                                         width: 50,
@@ -999,9 +999,10 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                           borderRadius: BorderRadius.circular(
                                             10,
                                           ),
-                                          color: _remainingSeconds == 0 
-                                              ? Colors.grey.withOpacity(0.5)
-                                              : const Color(0xFF393746),
+                                          color:
+                                              _remainingSeconds == 0
+                                                  ? Colors.grey.withOpacity(0.5)
+                                                  : const Color(0xFF393746),
                                         ),
                                         child: Center(
                                           child: Icon(
@@ -1009,10 +1010,12 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                                 ? Icons.check_circle_outline
                                                 : (_isTimerRunning
                                                     ? Icons.pause_circle_outline
-                                                    : Icons.play_circle_outline),
-                                            color: _remainingSeconds == 0 
-                                                ? Colors.grey
-                                                : Colors.white,
+                                                    : Icons
+                                                        .play_circle_outline),
+                                            color:
+                                                _remainingSeconds == 0
+                                                    ? Colors.grey
+                                                    : Colors.white,
                                             size: 25,
                                           ),
                                         ),

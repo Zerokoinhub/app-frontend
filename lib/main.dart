@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:zero_koin/controllers/theme_controller.dart';
 import 'package:zero_koin/controllers/user_controller.dart';
 import 'package:zero_koin/controllers/user_stats_controller.dart';
@@ -14,18 +17,31 @@ import 'package:zero_koin/services/auth_service.dart';
 import 'package:zero_koin/services/notification_service.dart';
 import 'package:zero_koin/services/admob_service.dart';
 import 'package:zero_koin/services/time_validation_service.dart';
+import 'package:zero_koin/view/home_screen.dart';
 import 'package:zero_koin/view/splash_screen.dart';
 import 'firebase_options.dart';
+import 'dart:developer' as developer;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize().then((initializationStatus) {
+    initializationStatus.adapterStatuses.forEach((key, value) {
+      developer.log('Adapter status for $key: ${value.description}');
+    });
+  });
+  RequestConfiguration configuration = RequestConfiguration(
+    testDeviceIds: ['YOUR_DEVICE_ID'],
+  );
+  MobileAds.instance.updateRequestConfiguration(configuration);
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  // Initialize AdMob
+  await AdMobService.initialize();
 
-  // Initialize Firebase only if not already initialized
-  if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  }
+  // Initialize AdMobController
+  Get.put(AdMobController());
+
+  // Initialize TimeValidationService first (required by SessionController)
+  Get.put(TimeValidationService());
 
   // Initialize ThemeController
   Get.put(ThemeController());
@@ -48,20 +64,9 @@ void main() async {
   // Initialize NotificationController
   Get.put(NotificationController());
 
-  // Initialize TimeValidationService first (required by SessionController)
-  Get.put(TimeValidationService());
-
-  // Initialize SessionController (depends on TimeValidationService)
-  Get.put(SessionController());
-
   // Initialize NotificationService
   Get.put(NotificationService());
-
-  // Initialize AdMob
-  await AdMobService.initialize();
-
-  // Initialize AdMobController
-  Get.put(AdMobController());
+  Get.put(SessionController());
 
   // Set status bar to light content (white text/icons)
   SystemChrome.setSystemUIOverlayStyle(

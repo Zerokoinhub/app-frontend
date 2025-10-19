@@ -13,7 +13,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 class InviteUserScreen extends StatelessWidget {
   const InviteUserScreen({super.key});
-  
+
   Future<void> _refreshUserData(BuildContext context) async {
     final UserController userController = Get.find<UserController>();
     try {
@@ -64,7 +64,10 @@ class InviteUserScreen extends StatelessWidget {
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 children: [
-                  AppBarContainer(color: Colors.black.withValues(alpha: 0.6), showTotalPosition: false),
+                  AppBarContainer(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    showTotalPosition: false,
+                  ),
                   const SizedBox(height: 16),
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -111,29 +114,46 @@ class InviteUserScreen extends StatelessWidget {
                               children: [
                                 Expanded(
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 15,
+                                    ),
                                     child: Obx(
-                                      () => userController.isLoading.value && userController.inviteCode.value.isEmpty
-                                          ? Center(
-                                              child: SizedBox(
-                                                width: 18,
-                                                height: 18,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                  color: Colors.white.withValues(alpha: 0.8),
+                                      () =>
+                                          userController.isLoading.value &&
+                                                  userController
+                                                      .inviteCode
+                                                      .value
+                                                      .isEmpty
+                                              ? Center(
+                                                child: SizedBox(
+                                                  width: 18,
+                                                  height: 18,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                        color: Colors.white
+                                                            .withValues(
+                                                              alpha: 0.8,
+                                                            ),
+                                                      ),
+                                                ),
+                                              )
+                                              : Text(
+                                                userController
+                                                        .inviteCode
+                                                        .value
+                                                        .isEmpty
+                                                    ? "No invite code available"
+                                                    : userController
+                                                        .inviteCode
+                                                        .value,
+                                                style: TextStyle(
+                                                  color: Colors.white
+                                                      .withValues(alpha: 0.8),
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
                                                 ),
                                               ),
-                                            )
-                                          : Text(
-                                              userController.inviteCode.value.isEmpty
-                                                  ? "No invite code available" 
-                                                  : userController.inviteCode.value,
-                                              style: TextStyle(
-                                                color: Colors.white.withValues(alpha: 0.8),
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
                                     ),
                                   ),
                                 ),
@@ -142,27 +162,42 @@ class InviteUserScreen extends StatelessWidget {
                                   width: 100,
                                   decoration: const BoxDecoration(
                                     border: Border(
-                                      left: BorderSide(color: Colors.white, width: 2),
+                                      left: BorderSide(
+                                        color: Colors.white,
+                                        width: 2,
+                                      ),
                                     ),
-                                    borderRadius: BorderRadius.all(Radius.circular(15.8)),
+                                    borderRadius: BorderRadius.all(
+                                      Radius.circular(15.8),
+                                    ),
                                   ),
                                   child: ClipRRect(
-                                    borderRadius: const BorderRadius.all(Radius.circular(15.8)),
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(15.8),
+                                    ),
                                     child: ElevatedButton(
                                       onPressed: () {
-                                        if (userController.inviteCode.value.isEmpty) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
+                                        if (userController
+                                            .inviteCode
+                                            .value
+                                            .isEmpty) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
                                             const SnackBar(
-                                              content: Text("No invite code available to copy"),
+                                              content: Text(
+                                                "No invite code available to copy",
+                                              ),
                                               backgroundColor: Colors.red,
                                             ),
                                           );
                                           return;
                                         }
-                                        
+
                                         Clipboard.setData(
                                           ClipboardData(
-                                            text: userController.inviteCode.value,
+                                            text:
+                                                userController.inviteCode.value,
                                           ),
                                         );
                                         ScaffoldMessenger.of(
@@ -177,16 +212,26 @@ class InviteUserScreen extends StatelessWidget {
                                         );
                                       },
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFF0682A2),
+                                        backgroundColor: const Color(
+                                          0xFF0682A2,
+                                        ),
                                         foregroundColor: Colors.white,
                                         elevation: 0,
                                         shape: const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.all(Radius.circular(15.8)),
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(15.8),
+                                          ),
                                           side: BorderSide.none,
                                         ),
                                         padding: EdgeInsets.zero,
                                       ),
-                                      child: const Text("Copy", style: TextStyle(fontSize: 14.58, fontWeight: FontWeight.w400)),
+                                      child: const Text(
+                                        "Copy",
+                                        style: TextStyle(
+                                          fontSize: 14.58,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -201,7 +246,10 @@ class InviteUserScreen extends StatelessWidget {
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
-                                side: const BorderSide(color: Color(0xFF0682A2), width: 2),
+                                side: const BorderSide(
+                                  color: Color(0xFF0682A2),
+                                  width: 2,
+                                ),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               foregroundColor: const Color(0xFF0682A2),
@@ -211,23 +259,31 @@ class InviteUserScreen extends StatelessWidget {
                               if (userController.inviteCode.value.isEmpty) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text("No invite code available to share"),
+                                    content: Text(
+                                      "No invite code available to share",
+                                    ),
                                     backgroundColor: Colors.red,
                                   ),
                                 );
                                 return;
                               }
-                              
-                              final String inviteCode = userController.inviteCode.value;
-                              final String message = "Hey! I'm using Zero Koin app. Join me with my invite code: $inviteCode";
+
+                              final String inviteCode =
+                                  userController.inviteCode.value;
+                              final String message =
+                                  "Hey! I'm using Zero Koin app. Join me with my invite code: $inviteCode";
 
                               try {
-                                await SharePlus.instance.share(ShareParams(text: message));
+                                await SharePlus.instance.share(
+                                  ShareParams(text: message),
+                                );
                               } catch (e) {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text("Could not open share sheet"),
+                                      content: Text(
+                                        "Could not open share sheet",
+                                      ),
                                       backgroundColor: Colors.red,
                                     ),
                                   );
@@ -274,7 +330,7 @@ class InviteUserScreen extends StatelessWidget {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    "Invite your friends and Earn 50 ZEROKOIN",
+                                    "Invite your friends and Earn 50 ZRK",
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -293,10 +349,13 @@ class InviteUserScreen extends StatelessWidget {
                                   hintText: "50",
                                 ),
                                 SizedBox(height: screenHeight * 0.02),
-                                Obx(() => WalletWidget(
-                                  title: "Recent Amount",
-                                  hintText: userController.recentAmount.toString(),
-                                )),
+                                Obx(
+                                  () => WalletWidget(
+                                    title: "Recent Amount",
+                                    hintText:
+                                        userController.recentAmount.toString(),
+                                  ),
+                                ),
                               ],
                             ),
                           ],

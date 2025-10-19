@@ -140,7 +140,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             SizedBox(height: 20),
                             GestureDetector(
-                              onTap: () => _launchUrl('https://bscscan.com/address/0x99349F73449b2BDFa631deFB0570df04afD70E97'),
+                              onTap:
+                                  () => _launchUrl(
+                                    'https://bscscan.com/token/0x220c0A61747832Bf6F61cB181d4Adf72Daf05014',
+                                  ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -157,7 +160,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: _themeController.isDarkMode ? Colors.white : Colors.black,
+                                      color:
+                                          _themeController.isDarkMode
+                                              ? Colors.white
+                                              : Colors.black,
                                     ),
                                   ),
                                 ],

@@ -217,7 +217,7 @@ class _ProgressPopupState extends State<ProgressPopup> {
                   ), // Responsive padding
                   child: Center(
                     child: Text(
-                      "Track Your ZEROKOIN\nProgress",
+                      "Track Your ZRK\nProgress",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: titleFontSize, // Responsive font size

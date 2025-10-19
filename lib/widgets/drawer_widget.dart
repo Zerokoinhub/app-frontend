@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:zero_koin/controllers/theme_controller.dart';
@@ -70,11 +72,19 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   children: [
-                    Image.asset(
-                      widget.imageUrl,
-                      width: 28,
-                      height: 28,
-                    ),
+                    widget.imageUrl == "assets/whitepaper.png"
+                        ? ImageFiltered(
+                          imageFilter: ImageFilter.blur(
+                            sigmaX: 0.7,
+                            sigmaY: 0.7,
+                          ),
+                          child: Image.asset(
+                            widget.imageUrl,
+                            width: 28,
+                            height: 28,
+                          ),
+                        )
+                        : Image.asset(widget.imageUrl, width: 28, height: 28),
                     SizedBox(width: 12),
                     Text(
                       widget.title,

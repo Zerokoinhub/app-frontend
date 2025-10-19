@@ -47,6 +47,20 @@ class SessionController extends GetxController {
     super.onClose();
   }
 
+  void _showSafeSnackbar(String title, String message) {
+    if (Get.context != null) {
+      Future.delayed(Duration.zero, () {
+        Get.snackbar(
+          'Time Validation Failed',
+          'Please check your time settings.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      });
+    } else {
+      print("⚠ Snackbar skipped: overlay not ready.");
+    }
+  }
+
   // Initialize time validation service
   void _initializeTimeValidation() {
     try {
@@ -56,7 +70,14 @@ class SessionController extends GetxController {
       ever(_timeValidationService!.isTimeValid, (bool isValid) {
         isTimeValid.value = isValid;
         if (!isValid) {
-          _handleTimeValidationFailure();
+          // Delay snackbar until overlay is ready
+          Future.microtask(() {
+            if (Get.context != null) {
+              _handleTimeValidationFailure();
+            } else {
+              print('⚠ Snackbar skipped: overlay not ready.');
+            }
+          });
         }
       });
 
@@ -74,14 +95,9 @@ class SessionController extends GetxController {
     // Force reload sessions from server when time manipulation is detected
     loadSessions();
 
-    // Show warning to user
-    Get.snackbar(
+    _showSafeSnackbar(
       'Time Sync Warning',
-      'Your device time appears to be incorrect. Session timers have been synchronized with server time.',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Get.theme.colorScheme.error.withOpacity(0.8),
-      colorText: Get.theme.colorScheme.onError,
-      duration: const Duration(seconds: 5),
+      'Your device time appears to be incorrect...',
     );
   }
 
@@ -316,13 +332,9 @@ class SessionController extends GetxController {
         await loadSessions();
         print('Sessions reset successfully');
 
-        Get.snackbar(
-          'Sessions Reset!',
-          'All sessions have been reset to initial state.',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.blue,
-          colorText: Colors.white,
-          duration: Duration(seconds: 3),
+        _showSafeSnackbar(
+          'Time Sync Warning',
+          'Your device time appears to be incorrect...',
         );
 
         return true;

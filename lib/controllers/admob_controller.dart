@@ -1,9 +1,10 @@
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:zero_koin/services/admob_service.dart';
+import 'dart:developer' as developer;
 
 class AdMobController extends GetxController {
-  BannerAd? bannerAd;
+  Rx<BannerAd?> bannerAd = Rx<BannerAd?>(null);
   BannerAd? learnAndEarnBannerAd;
   BannerAd? notificationBannerAd;
   InterstitialAd? interstitialAd;
@@ -25,7 +26,6 @@ class AdMobController extends GetxController {
 
   @override
   void onClose() {
-    bannerAd?.dispose();
     learnAndEarnBannerAd?.dispose();
     notificationBannerAd?.dispose();
     interstitialAd?.dispose();
@@ -34,23 +34,37 @@ class AdMobController extends GetxController {
   }
 
   void _createBannerAd() {
-    bannerAd = BannerAd(
-      adUnitId: AdMobService.bannerAdUnitId,
-      request: const AdRequest(),
-      size: AdSize.banner,
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          isBannerAdReady.value = true;
-        },
-        onAdFailedToLoad: (ad, err) {
-          print('Failed to load a banner ad: ${err.message}');
-          isBannerAdReady.value = true; // Set to true to prevent blocking splash screen
-          ad.dispose();
-        },
-      ),
-    );
+    try {
+      final ad = BannerAd(
+        adUnitId: AdMobService.bannerAdUnitId,
+        request: const AdRequest(),
+        size: AdSize.banner,
+        listener: BannerAdListener(
+          onAdLoaded: (ad) {
+            bannerAd.value = ad as BannerAd;
+            //Check the mediation adapter that filled this add
+            developer.log(
+              "Banner ad loaded from ${ad.responseInfo?.mediationAdapterClassName}",
+            );
+            isBannerAdReady.value = true;
+            developer.log("✅ Banner ad loaded");
+          },
+          onAdFailedToLoad: (ad, err) {
+            developer.log("❌ Banner ad failed: ${err.message}");
+            print('Failed to load a banner ad: ${err.message}');
+            ad.dispose();
 
-    bannerAd!.load();
+            isBannerAdReady.value = false;
+          },
+        ),
+      );
+
+      ad.load();
+    } catch (e) {
+      developer.log("❌ Banner ad failed: $e");
+      print('Failed to load a banner ad: $e');
+      isBannerAdReady.value = false;
+    }
   }
 
   void _createLearnAndEarnBannerAd() {
@@ -64,7 +78,8 @@ class AdMobController extends GetxController {
         },
         onAdFailedToLoad: (ad, err) {
           print('Failed to load a learn and earn banner ad: ${err.message}');
-          isLearnAndEarnBannerAdReady.value = true; // Set to true to prevent blocking splash screen
+          isLearnAndEarnBannerAdReady.value =
+              false; // Set to true to prevent blocking splash screen
           ad.dispose();
         },
       ),
@@ -84,7 +99,8 @@ class AdMobController extends GetxController {
         },
         onAdFailedToLoad: (ad, err) {
           print('Failed to load a notification banner ad: ${err.message}');
-          isNotificationBannerAdReady.value = true; // Set to true to prevent blocking splash screen
+          isNotificationBannerAdReady.value =
+              false; // Set to true to prevent blocking splash screen
           ad.dispose();
         },
       ),
@@ -100,6 +116,10 @@ class AdMobController extends GetxController {
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
           interstitialAd = ad;
+          developer.log(
+            "✅ Interstitial ad loaded from ${ad.responseInfo?.mediationAdapterClassName}",
+          );
+
           isInterstitialAdReady.value = true;
         },
         onAdFailedToLoad: (err) {

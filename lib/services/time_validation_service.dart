@@ -337,15 +337,19 @@ class TimeValidationService extends GetxService {
       }
     }
 
-    // Only show snackbar if time is still not synchronized
-    Get.snackbar(
-      'Time Validation Error',
-      'Device time has been changed. Please ensure your device time is correct.',
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Get.theme.colorScheme.error,
-      colorText: Get.theme.colorScheme.onError,
-      duration: const Duration(seconds: 5),
-    );
+    if (Get.context != null) {
+      // Only show snackbar if time is still not synchronized
+      Get.snackbar(
+        'Time Validation Error',
+        'Device time has been manually changed. Please ensure your device time is correct.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Get.theme.colorScheme.error,
+        colorText: Get.theme.colorScheme.onError,
+        duration: const Duration(seconds: 5),
+      );
+    } else {
+      print("⚠ Snackbar skipped: overlay not ready.");
+    }
   }
 
   /// Update last known time

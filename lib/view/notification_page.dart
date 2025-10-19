@@ -81,50 +81,47 @@ class NotificationPage extends StatelessWidget {
                     ),
                     SizedBox(height: 20),
                     // AdMob Banner Ad for Notification Page
-                    Obx(
-                      () =>
-                          adMobController.isNotificationBannerAdReady.value
-                              ? Container(
-                                width:
-                                    adMobController
-                                        .notificationBannerAd!
-                                        .size
-                                        .width
-                                        .toDouble(),
-                                height:
-                                    adMobController
-                                        .notificationBannerAd!
-                                        .size
-                                        .height
-                                        .toDouble(),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: AdWidget(
-                                  ad: adMobController.notificationBannerAd!,
-                                ),
-                              )
-                              : Container(
-                                width: 320,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: Colors.grey.withAlpha(0.3.toInt()),
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.blue,
-                                    ),
-                                  ),
-                                ),
+                    Obx(() {
+                      final ad = adMobController.notificationBannerAd;
+                      final isReady =
+                          adMobController.isNotificationBannerAdReady.value;
+
+                      if (isReady && ad != null) {
+                        // ✅ Ad is loaded, show AdWidget
+                        return Container(
+                          width: ad.size.width.toDouble(),
+                          height: ad.size.height.toDouble(),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: AdWidget(ad: ad),
+                        );
+                      } else {
+                        // ❌ Ad not loaded yet, show placeholder
+                        return Container(
+                          width: 320,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: Colors.grey.withAlpha(
+                                77,
+                              ), // 0.3.toInt() ≈ 77
+                              width: 1,
+                            ),
+                          ),
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.blue,
                               ),
-                    ),
+                            ),
+                          ),
+                        );
+                      }
+                    }),
                   ],
                 ),
               ),
@@ -207,10 +204,19 @@ class NotificationPage extends StatelessWidget {
                                             .onNotificationTap(notification);
 
                                         // If a link is provided by API, open it
-                                        if (notification.link.trim().isNotEmpty) {
-                                          final Uri uri = Uri.parse(notification.link.trim());
+                                        if (notification.link
+                                            .trim()
+                                            .isNotEmpty) {
+                                          final Uri uri = Uri.parse(
+                                            notification.link.trim(),
+                                          );
                                           if (await canLaunchUrl(uri)) {
-                                            await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                            await launchUrl(
+                                              uri,
+                                              mode:
+                                                  LaunchMode
+                                                      .externalApplication,
+                                            );
                                           }
                                         } else {
                                           // Fallback: show existing popup if no link

@@ -83,31 +83,19 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _waitForAllAdsToLoad() async {
-    // Wait for all three banner ads to load with timeout
-    const maxWaitTime = Duration(seconds: 10); // Maximum wait time for ads
-    const checkInterval = Duration(milliseconds: 100);
-    final startTime = DateTime.now();
-
-    while (!_adMobController.isBannerAdReady.value ||
-        !_adMobController.isLearnAndEarnBannerAdReady.value ||
-        !_adMobController.isNotificationBannerAdReady.value) {
-
-      // Check if we've exceeded the maximum wait time
-      if (DateTime.now().difference(startTime) > maxWaitTime) {
-        print('⚠️ Ad loading timeout reached, proceeding without all ads loaded');
-        print('Banner ad ready: ${_adMobController.isBannerAdReady.value}');
-        print('Learn & Earn ad ready: ${_adMobController.isLearnAndEarnBannerAdReady.value}');
-        print('Notification ad ready: ${_adMobController.isNotificationBannerAdReady.value}');
-        break;
-      }
-
-      await Future.delayed(checkInterval);
-    }
-
-    if (_adMobController.isBannerAdReady.value &&
-        _adMobController.isLearnAndEarnBannerAdReady.value &&
-        _adMobController.isNotificationBannerAdReady.value) {
-      print('✅ All banner ads loaded successfully');
+    try {
+      await Future.wait([
+        _adMobController.isBannerAdReady.stream.firstWhere((ready) => ready),
+        _adMobController.isLearnAndEarnBannerAdReady.stream.firstWhere(
+          (ready) => ready,
+        ),
+        _adMobController.isNotificationBannerAdReady.stream.firstWhere(
+          (ready) => ready,
+        ),
+      ]).timeout(const Duration(seconds: 10));
+      print("✅ All ads loaded");
+    } catch (_) {
+      print("⚠️ Ads loading timeout, proceeding anyway");
     }
   }
 
@@ -120,12 +108,16 @@ class _SplashScreenState extends State<SplashScreen>
       await timeValidationService.waitForInitialization().timeout(
         const Duration(seconds: 5), // Reduced timeout to 5 seconds
         onTimeout: () {
-          print('⚠️ Time validation initialization timeout in splash screen - proceeding anyway');
+          print(
+            '⚠️ Time validation initialization timeout in splash screen - proceeding anyway',
+          );
         },
       );
       print('✅ Time validation initialized successfully in splash screen');
     } catch (e) {
-      print('⚠️ Error initializing time validation in splash screen: $e - proceeding anyway');
+      print(
+        '⚠️ Error initializing time validation in splash screen: $e - proceeding anyway',
+      );
       // Don't rethrow the error - let the app continue
     }
   }

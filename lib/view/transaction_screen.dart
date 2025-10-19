@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:zero_koin/controllers/theme_controller.dart';
 import 'package:zero_koin/controllers/admob_controller.dart';
 import 'package:zero_koin/controllers/transaction_controller.dart';
 import 'package:zero_koin/widgets/app_bar_container.dart';
 import 'package:zero_koin/widgets/my_drawer.dart';
+import 'dart:developer' as developer;
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
@@ -19,6 +21,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   @override
   void initState() {
     super.initState();
+    _loadtestDeviceAds();
 
     // Initialize transaction controller - use Get.find if exists, otherwise create new
     if (Get.isRegistered<TransactionController>()) {
@@ -38,6 +41,26 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     // Wait for the screen to build, then wait for ad to be ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _waitAndShowAd();
+    });
+  }
+
+  Future<void> _loadtestDeviceAds() async {
+    RequestConfiguration requestConfiguration = RequestConfiguration(
+      testDeviceIds: ['7BBFE05555556F981578D2707A0885E3'],
+    );
+    await MobileAds.instance.updateRequestConfiguration(requestConfiguration);
+
+    developer.log("✅ Test device ads loaded");
+  }
+
+  /// 🧠 Opens the Ad Inspector and listens for errors
+  void openAdInspector() {
+    MobileAds.instance.openAdInspector((error) {
+      if (error != null) {
+        developer.log("❌ Failed to open Ad Inspector: ${error.message}");
+      } else {
+        developer.log("✅ Ad Inspector closed successfully (no errors)");
+      }
     });
   }
 
@@ -105,6 +128,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     ),
                   ],
                 ),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  openAdInspector();
+                },
+                child: const Text('Open Ad Inspector'),
               ),
               SizedBox(height: 32),
               Expanded(

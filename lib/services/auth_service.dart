@@ -7,6 +7,7 @@ import 'api_service.dart';
 import 'device_auth_service.dart';
 import 'time_validation_service.dart';
 import '../widgets/device_auth_warning_dialog.dart';
+import 'dart:developer' as developer;
 
 class AuthService extends GetxController {
   static AuthService get instance => Get.find();
@@ -58,9 +59,9 @@ class AuthService extends GetxController {
       // Debug: Print device auth info
       if (Get.isLogEnable) {
         final debugInfo = await deviceAuthService.getDeviceAuthInfo();
-        print('🔍 Device Auth Debug Info: $debugInfo');
-        print('🔍 Current user trying to sign in: $userEmail');
-        print(
+        developer.log('🔍 Device Auth Debug Info: $debugInfo');
+        developer.log('🔍 Current user trying to sign in: $userEmail');
+        developer.log(
           '🔍 Is different user: ${await deviceAuthService.isDifferentUser(userEmail)}',
         );
       }
@@ -72,7 +73,7 @@ class AuthService extends GetxController {
         final lastUserEmail = await deviceAuthService.getLastUserEmail();
 
         if (Get.isLogEnable) {
-          print(
+          developer.log(
             '🚨 Different user detected! Last: $lastUserEmail, New: $userEmail',
           );
         }
@@ -83,7 +84,7 @@ class AuthService extends GetxController {
         // Sign out from Google and return null to prevent sign-in
         await _googleSignIn.signOut();
         if (Get.isLogEnable) {
-          print('❌ Different user blocked from signing in');
+          developer.log('❌ Different user blocked from signing in');
         }
         return null;
       }
@@ -139,7 +140,7 @@ class AuthService extends GetxController {
       Get.back(); // Close loading dialog if open
 
       String errorMessage = 'Failed to sign in with Google';
-      
+
       // Provide more specific error messages
       if (e.toString().contains('network_error')) {
         errorMessage = 'Network error. Please check your internet connection.';
@@ -147,8 +148,11 @@ class AuthService extends GetxController {
         errorMessage = 'Sign-in was canceled.';
       } else if (e.toString().contains('sign_in_failed')) {
         errorMessage = 'Google Sign-in failed. Please try again.';
-      } else if (e.toString().contains('account-exists-with-different-credential')) {
-        errorMessage = 'An account already exists with a different sign-in method.';
+      } else if (e.toString().contains(
+        'account-exists-with-different-credential',
+      )) {
+        errorMessage =
+            'An account already exists with a different sign-in method.';
       }
 
       // Show error message

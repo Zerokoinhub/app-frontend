@@ -31,7 +31,7 @@ class LanguageController extends GetxController {
       "learn_blockchain": "Learn Blockchain",
       "learn_mining": "Learn Mining",
       "learn_stock_market": "Learn Stock Market",
-      "earn_koins_daily": "Earn 10 Koins Daily By Learning!",
+      "earn_koins_daily": "Earn 10 ZRK Daily By Learning!",
       "timer": "Timer",
       "previous": "Previous",
       "next": "Next",

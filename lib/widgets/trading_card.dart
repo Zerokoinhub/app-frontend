@@ -15,6 +15,10 @@ class TradingCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isSmallBox =
+        card.platformName == 'CoinGecko' ||
+        card.platformName == 'Coinmarketcap';
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Stack(
@@ -22,7 +26,7 @@ class TradingCardWidget extends StatelessWidget {
           // Main card content
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(isSmallBox ? 8 : 12),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.1),
               borderRadius: BorderRadius.circular(16),
@@ -41,8 +45,8 @@ class TradingCardWidget extends StatelessWidget {
                     card.platformIcon.contains('assets/')
                         ? Image.asset(
                           card.platformIcon,
-                          width: 32,
-                          height: 32,
+                          width: isSmallBox ? 28 : 32,
+                          height: isSmallBox ? 28 : 32,
                           fit: BoxFit.contain,
                         )
                         : Container(
@@ -89,9 +93,9 @@ class TradingCardWidget extends StatelessWidget {
                         )
                         : Text(
                           card.platformName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 24,
+                            fontSize: isSmallBox ? 22 : 24,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -102,7 +106,8 @@ class TradingCardWidget extends StatelessWidget {
                 SizedBox(
                   width: 240,
                   child: GestureDetector(
-                    onTap: card.url != null ? () => _launchUrl(card.url!) : null,
+                    onTap:
+                        card.url != null ? () => _launchUrl(card.url!) : null,
                     child: Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -129,33 +134,33 @@ class TradingCardWidget extends StatelessWidget {
                   'Listing date: ${card.listingDate}',
                   style: TextStyle(
                     color: Colors.white.withOpacity(0.7),
-                    fontSize: 12,
+                    fontSize: isSmallBox ? 10 : 12,
                   ),
                 ),
               ],
             ),
           ),
           // Launching Soon badge positioned in top-right
-          if (card.isLaunchingSoon)
-            Positioned(
-              top: 4,
-              right: 4,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0682A2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Text(
-                  'Launching Soon',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
+          // if (card.isLaunchingSoon)
+          //   Positioned(
+          //     top: 4,
+          //     right: 4,
+          //     child: Container(
+          //       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+          //       decoration: BoxDecoration(
+          //         color: const Color(0xFF0682A2),
+          //         borderRadius: BorderRadius.circular(12),
+          //       ),
+          //       child: const Text(
+          //         'Launching Soon',
+          //         style: TextStyle(
+          //           color: Colors.white,
+          //           fontSize: 12,
+          //           fontWeight: FontWeight.w500,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
         ],
       ),
     );

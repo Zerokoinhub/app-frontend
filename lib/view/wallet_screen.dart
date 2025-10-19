@@ -17,6 +17,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:zero_koin/controllers/user_controller.dart';
 import 'package:zero_koin/widgets/gradient_circular_progress_painter.dart';
 import 'package:zero_koin/view/zerokoin_buy.dart';
+import 'package:flutter/widget_previews.dart';
 
 // Mock class for demonstration purposes
 class MockSessionStatus {
@@ -26,6 +27,7 @@ class MockSessionStatus {
   MockSessionStatus({required this.accounts, required this.chainId});
 }
 
+@Preview(name: 'Wallet Screen')
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
 
@@ -669,13 +671,13 @@ class _WalletScreenState extends State<WalletScreen>
     }
 
     if (withdrawalAmount < 4000) {
-      _showInvalidAmountDialog('Minimum withdrawal amount is 4000 ZeroKoin.');
+      _showInvalidAmountDialog('Minimum withdrawal amount is 4000 ZRK.');
       return;
     }
 
     if (withdrawalAmount > userBalance) {
       _showInvalidAmountDialog(
-        'Insufficient balance. Your current balance is $userBalance ZeroKoin.',
+        'Insufficient balance. Your current balance is $userBalance ZRK.',
       );
       return;
     }
@@ -733,7 +735,7 @@ class _WalletScreenState extends State<WalletScreen>
             style: TextStyle(color: Colors.white),
           ),
           content: Text(
-            'You need a minimum balance of 4000 ZeroKoin to withdraw. Your current balance is ${_userController.balance.value} ZeroKoin.',
+            'You need a minimum balance of 4000 ZRK to withdraw. Your current balance is ${_userController.balance.value} ZRK.',
             style: TextStyle(color: Colors.white70),
           ),
           actions: [
@@ -859,7 +861,7 @@ class _WalletScreenState extends State<WalletScreen>
             style: TextStyle(color: Colors.white),
           ),
           content: Text(
-            'Your withdrawal of $amount ZeroKoin has been processed successfully. You can view the transaction in the Transactions screen.',
+            'Your withdrawal of $amount ZRK has been processed successfully. You can view the transaction in the Transactions screen.',
             style: TextStyle(color: Colors.white70),
           ),
           actions: [
@@ -914,7 +916,6 @@ class _WalletScreenState extends State<WalletScreen>
     final screenWidth = MediaQuery.of(context).size.width;
 
     // Remove the automatic refresh on every build - this was causing the flickering
-
     return Scaffold(
       drawer: MyDrawer(),
       body: Stack(
@@ -981,7 +982,7 @@ class _WalletScreenState extends State<WalletScreen>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "ZeroKoin Withdrawal Pool",
+                                      "Zero Koin Withdrawal Pool",
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -1156,14 +1157,14 @@ class _WalletScreenState extends State<WalletScreen>
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              'Available Balance: $userBalance ZeroKoin',
+                                              'Available Balance: $userBalance ZRK',
                                               style: TextStyle(
                                                 color: Colors.white70,
                                                 fontSize: 12,
                                               ),
                                             ),
                                             Text(
-                                              'Minimum withdrawal: 4000 ZeroKoin',
+                                              'Minimum withdrawal: 4000 ZRK',
                                               style: TextStyle(
                                                 color: Colors.white54,
                                                 fontSize: 11,
@@ -1175,7 +1176,7 @@ class _WalletScreenState extends State<WalletScreen>
                                     }),
                                     SizedBox(height: 10),
                                     Text(
-                                      "How to Withdraw Zero Coin?",
+                                      "How to Withdraw Zero Koin?",
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 20,
@@ -1189,7 +1190,7 @@ class _WalletScreenState extends State<WalletScreen>
                                         children: [
                                           TextSpan(
                                             text:
-                                                "When the Withdrawal Pool is 100% you can withdraw your full wallet balance. Please connect your Zerokoin (Web 3) wallet ",
+                                                "When the Withdrawal Pool is 100% you can withdraw your full wallet balance. Please connect your Zero Koin (Web 3) wallet ",
                                           ),
                                           WidgetSpan(
                                             alignment:
@@ -1384,7 +1385,7 @@ class _WalletScreenState extends State<WalletScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "ZeroKoin Wallet Address",
+                                "Zero Koin Wallet Address",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
@@ -1427,7 +1428,7 @@ class _WalletScreenState extends State<WalletScreen>
                                         hintText:
                                             _session != null
                                                 ? "Connected wallet address"
-                                                : "Enter Zerokoin Wallet Address",
+                                                : "Enter Zero Koin Wallet Address",
                                         hintStyle: TextStyle(
                                           color: Colors.white70,
                                         ),
