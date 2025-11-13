@@ -98,34 +98,13 @@ class NotificationPage extends StatelessWidget {
                         );
                       } else {
                         // ❌ Ad not loaded yet, show placeholder
-                        return Container(
-                          width: 320,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: Colors.grey.withAlpha(
-                                77,
-                              ), // 0.3.toInt() ≈ 77
-                              width: 1,
-                            ),
-                          ),
-                          child: const Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.blue,
-                              ),
-                            ),
-                          ),
-                        );
+                        return SizedBox();
                       }
                     }),
                   ],
                 ),
               ),
-              SizedBox(height: screenHeight * 0.02),
+              // SizedBox(height: screenHeight * 0.02),
               Expanded(
                 child: Container(
                   width: double.infinity,
@@ -249,130 +228,243 @@ class NotificationPage extends StatelessWidget {
                                             10,
                                           ),
                                         ),
-                                        child: Padding(
-                                          padding: EdgeInsets.all(16),
-                                          child: Row(
-                                            children: [
-                                              // Notification image
-                                              Container(
-                                                width: 50,
-                                                height: 50,
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  child: Image.network(
-                                                    notification.fullImageUrl,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) {
-                                                      return Image.asset(
-                                                        "assets/zerokoingold.png",
-                                                        fit: BoxFit.contain,
-                                                      );
-                                                    },
-                                                    loadingBuilder: (
-                                                      context,
-                                                      child,
-                                                      loadingProgress,
-                                                    ) {
-                                                      if (loadingProgress ==
-                                                          null) {
-                                                        return child;
-                                                      }
-                                                      return Center(
-                                                        child: CircularProgressIndicator(
-                                                          strokeWidth: 2,
-                                                          value:
-                                                              loadingProgress
-                                                                          .expectedTotalBytes !=
-                                                                      null
-                                                                  ? loadingProgress
-                                                                          .cumulativeBytesLoaded /
-                                                                      loadingProgress
-                                                                          .expectedTotalBytes!
-                                                                  : null,
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
-                                                ),
+                                        child: ListTile(
+                                          contentPadding: EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 8,
+                                          ),
+                                          leading: ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            child: SizedBox(
+                                              width: 50,
+                                              height: 50,
+                                              child: Image.network(
+                                                notification.fullImageUrl,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (
+                                                  context,
+                                                  error,
+                                                  stackTrace,
+                                                ) {
+                                                  return Image.asset(
+                                                    "assets/zerokoingold.png",
+                                                    fit: BoxFit.contain,
+                                                  );
+                                                },
+                                                loadingBuilder: (
+                                                  context,
+                                                  child,
+                                                  progress,
+                                                ) {
+                                                  if (progress == null)
+                                                    return child;
+                                                  return Center(
+                                                    child: SizedBox(
+                                                      width: 20,
+                                                      height: 20,
+                                                      child: CircularProgressIndicator(
+                                                        strokeWidth: 2,
+                                                        value:
+                                                            progress.expectedTotalBytes !=
+                                                                    null
+                                                                ? progress
+                                                                        .cumulativeBytesLoaded /
+                                                                    progress
+                                                                        .expectedTotalBytes!
+                                                                : null,
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
                                               ),
-                                              SizedBox(width: 12),
-                                              Expanded(
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      notification.title,
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.bold,
+                                            ),
+                                          ),
+                                          title: Text(
+                                            notification.title,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: themeController.textColor,
+                                            ),
+                                          ),
+                                          trailing: Icon(
+                                            Icons.chevron_right,
+                                            size: 22,
+                                            color: themeController.textColor
+                                                .withValues(alpha: 0.7),
+                                          ),
+                                          onTap: () async {
+                                            // Mark as read / perform controller action
+                                            notificationController
+                                                .onNotificationTap(
+                                                  notification,
+                                                );
+
+                                            // Show full details in a dialog
+                                            showDialog(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return BackdropFilter(
+                                                  filter: ImageFilter.blur(
+                                                    sigmaX: 5.0,
+                                                    sigmaY: 5.0,
+                                                  ),
+                                                  child: Dialog(
+                                                    backgroundColor:
+                                                        Colors.transparent,
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
                                                         color:
                                                             themeController
-                                                                .textColor,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 4),
-                                                    Builder(
-                                                      builder: (context) {
-                                                        print(
-                                                          '🎯 Displaying notification: ${notification.title}',
-                                                        );
-                                                        print(
-                                                          '   Content: "${notification.content}"',
-                                                        );
-                                                        print(
-                                                          '   DisplayText: "${notification.displayText}"',
-                                                        );
-                                                        return Text(
-                                                          notification
-                                                              .displayText,
-                                                          style: TextStyle(
-                                                            fontSize: 14,
-                                                            color:
-                                                                themeController
-                                                                    .textColor,
-                                                          ),
-                                                        );
-                                                      },
-                                                    ),
-                                                    SizedBox(height: 4),
-                                                    Text(
-                                                      notification.timeAgo,
-                                                      style: TextStyle(
-                                                        fontSize: 12,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: themeController
-                                                            .textColor
-                                                            .withValues(
-                                                              alpha: 0.7,
+                                                                .contentBackgroundColor,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              12,
                                                             ),
                                                       ),
+                                                      padding: EdgeInsets.all(
+                                                        16,
+                                                      ),
+                                                      child: SingleChildScrollView(
+                                                        child: Column(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            // large image
+                                                            if (notification
+                                                                .fullImageUrl
+                                                                .trim()
+                                                                .isNotEmpty)
+                                                              ClipRRect(
+                                                                borderRadius:
+                                                                    BorderRadius.circular(
+                                                                      8,
+                                                                    ),
+                                                                child: Image.network(
+                                                                  notification
+                                                                      .fullImageUrl,
+                                                                  fit:
+                                                                      BoxFit
+                                                                          .cover,
+                                                                  width:
+                                                                      double
+                                                                          .infinity,
+                                                                  height: 180,
+                                                                  errorBuilder:
+                                                                      (
+                                                                        c,
+                                                                        e,
+                                                                        s,
+                                                                      ) => Image.asset(
+                                                                        "assets/zerokoingold.png",
+                                                                        fit:
+                                                                            BoxFit.contain,
+                                                                      ),
+                                                                ),
+                                                              ),
+                                                            SizedBox(
+                                                              height: 12,
+                                                            ),
+                                                            Text(
+                                                              notification
+                                                                  .title,
+                                                              style: TextStyle(
+                                                                fontSize: 18,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color:
+                                                                    themeController
+                                                                        .textColor,
+                                                              ),
+                                                            ),
+                                                            SizedBox(height: 8),
+                                                            Text(
+                                                              notification
+                                                                  .displayText,
+                                                              style: TextStyle(
+                                                                fontSize: 15,
+                                                                color:
+                                                                    themeController
+                                                                        .textColor,
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              height: 12,
+                                                            ),
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              children: [
+                                                                Text(
+                                                                  notification
+                                                                      .timeAgo,
+                                                                  style: TextStyle(
+                                                                    fontSize:
+                                                                        12,
+                                                                    color: themeController
+                                                                        .textColor
+                                                                        .withValues(
+                                                                          alpha:
+                                                                              0.7,
+                                                                        ),
+                                                                  ),
+                                                                ),
+                                                                Row(
+                                                                  children: [
+                                                                    if (notification
+                                                                        .link
+                                                                        .trim()
+                                                                        .isNotEmpty)
+                                                                      TextButton(
+                                                                        onPressed: () async {
+                                                                          final Uri
+                                                                          uri = Uri.parse(
+                                                                            notification.link.trim(),
+                                                                          );
+                                                                          if (await canLaunchUrl(
+                                                                            uri,
+                                                                          )) {
+                                                                            await launchUrl(
+                                                                              uri,
+                                                                              mode:
+                                                                                  LaunchMode.externalApplication,
+                                                                            );
+                                                                          }
+                                                                        },
+                                                                        child: Text(
+                                                                          'Open Link',
+                                                                        ),
+                                                                      ),
+                                                                    TextButton(
+                                                                      onPressed: () {
+                                                                        Navigator.of(
+                                                                          context,
+                                                                        ).pop();
+                                                                      },
+                                                                      child: Text(
+                                                                        'Close',
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
                                                     ),
-                                                  ],
-                                                ),
-                                              ),
-                                              SizedBox(width: 8),
-                                              Icon(
-                                                Icons.chevron_right,
-                                                size: 22,
-                                                color: themeController.textColor
-                                                    .withValues(alpha: 0.7),
-                                              ),
-                                            ],
-                                          ),
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
                                         ),
                                       ),
                                     ),

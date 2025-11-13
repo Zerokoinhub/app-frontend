@@ -7,35 +7,6 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:710512977280:android:b0debd15e80f6091b04d65",
-        "android_client_info": {
-          "package_name": "com.zerokoin.www"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "710512977280-1r07e4m09tk122ds7qgkqssu28rcj8fi.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBO744IB8qAI9o3pGz3dMd_rtR7m4_WYVQ"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "710512977280-1r07e4m09tk122ds7qgkqssu28rcj8fi.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
         "mobilesdk_app_id": "1:710512977280:android:abb8b239ba4bf871b04d65",
         "android_client_info": {
           "package_name": "com.zerokoin.zerokoinapp"
@@ -43,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "710512977280-bio7s17f7kd1i472hgie4iqqe409vp5o.apps.googleusercontent.com",
+          "client_id": "710512977280-fg3dpcr7ls3djinsnr0cpo73o7qc4kar.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.zerokoin.zerokoinapp",
-            "certificate_hash": "4b871bb5f3a8d07cd610644b8bf014f9030ff278"
+            "certificate_hash": "314bf36e44f3edc52561690bbeb9b2d3ee620390"
           }
         },
         {
@@ -66,6 +37,13 @@
             {
               "client_id": "710512977280-1r07e4m09tk122ds7qgkqssu28rcj8fi.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "710512977280-4up130t8dmipj0smtfalmkf4526adrkm.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.zeroKoin"
+              }
             }
           ]
         }

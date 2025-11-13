@@ -18,6 +18,7 @@ import 'package:zero_koin/services/notification_service.dart';
 import 'package:zero_koin/services/admob_service.dart';
 import 'package:zero_koin/services/time_validation_service.dart';
 import 'package:zero_koin/view/home_screen.dart';
+import 'package:zero_koin/view/notification_page.dart';
 import 'package:zero_koin/view/splash_screen.dart';
 import 'firebase_options.dart';
 import 'dart:developer' as developer;

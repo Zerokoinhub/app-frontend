@@ -25,9 +25,15 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
-        return windows;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for windows - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -41,46 +47,31 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'your-web-api-key',
-    appId: 'your-web-app-id',
-    messagingSenderId: 'your-messaging-sender-id',
-    projectId: 'your-project-id',
-    authDomain: 'your-project-id.firebaseapp.com',
-    storageBucket: 'your-project-id.appspot.com',
+    apiKey: 'AIzaSyCEy-qfpEIInbnfr1EIB8rb-2dNv2O0a0o',
+    appId: '1:710512977280:web:94bc0c441aa9d345b04d65',
+    messagingSenderId: '710512977280',
+    projectId: 'zerokoin-705c5',
+    authDomain: 'zerokoin-705c5.firebaseapp.com',
+    storageBucket: 'zerokoin-705c5.firebasestorage.app',
+    measurementId: 'G-R1CQYYB731',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBO744IB8qAI9o3pGz3dMd_rtR7m4_WYVQ',
-    appId: '1:710512977280:android:b0debd15e80f6091b04d65',
+    appId: '1:710512977280:android:abb8b239ba4bf871b04d65',
     messagingSenderId: '710512977280',
     projectId: 'zerokoin-705c5',
     storageBucket: 'zerokoin-705c5.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'your-ios-api-key',
-    appId: 'your-ios-app-id',
-    messagingSenderId: 'your-messaging-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project-id.appspot.com',
-    iosBundleId: 'com.zerokoin.www',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'your-macos-api-key',
-    appId: 'your-macos-app-id',
-    messagingSenderId: 'your-messaging-sender-id',
-    projectId: 'your-project-id',
-    storageBucket: 'your-project-id.appspot.com',
-    iosBundleId: 'com.zerokoin.www',
-  );
-
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'your-windows-api-key',
-    appId: 'your-windows-app-id',
-    messagingSenderId: 'your-messaging-sender-id',
-    projectId: 'your-project-id',
-    authDomain: 'your-project-id.firebaseapp.com',
-    storageBucket: 'your-project-id.appspot.com',
+    apiKey: 'AIzaSyDX-Wikuj10Ywnx7Z7uMjf4q7xyJymyL2U',
+    appId: '1:710512977280:ios:1f3c5865fdfaf88cb04d65',
+    messagingSenderId: '710512977280',
+    projectId: 'zerokoin-705c5',
+    storageBucket: 'zerokoin-705c5.firebasestorage.app',
+    androidClientId: '710512977280-5ectqdoorq1saljvd6l7o4f8gvr75j8n.apps.googleusercontent.com',
+    iosClientId: '710512977280-4up130t8dmipj0smtfalmkf4526adrkm.apps.googleusercontent.com',
+    iosBundleId: 'com.example.zeroKoin',
   );
 }
