@@ -107,22 +107,35 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
 
   // Timer methods
   void _startTimer() {
-    if (!_isTimerRunning && !_isTimerPaused) {
-      setState(() {
-        _isTimerRunning = true;
-        _isTimerPaused = false;
-      });
+    // Prevent creating multiple active timers
+    if (_timer != null && _timer!.isActive) return;
 
-      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        setState(() {
-          if (_remainingSeconds > 0) {
-            _remainingSeconds--;
-          } else {
-            _stopTimer();
-          }
-        });
+    setState(() {
+      _isTimerRunning = true;
+      _isTimerPaused = false;
+    });
+
+    // Ensure any previous timer is cancelled before creating a new one
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      // Guard against widget being disposed
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      setState(() {
+        if (_remainingSeconds > 1) {
+          _remainingSeconds--;
+        } else {
+          // When remainingSeconds reaches 0, stop timer and trigger completion
+          _remainingSeconds = 0;
+          // Cancel periodic timer now to avoid re-entrancy
+          timer.cancel();
+          _stopTimer();
+        }
       });
-    }
+    });
   }
 
   void _pauseTimer() {
@@ -136,17 +149,28 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
   }
 
   void _resumeTimer() {
-    if (_isTimerPaused) {
+    // Only resume if we are paused and there is remaining time
+    if (_isTimerPaused && _remainingSeconds > 0) {
+      // Prevent duplicate timers
+      if (_timer != null && _timer!.isActive) return;
+
       setState(() {
         _isTimerRunning = true;
         _isTimerPaused = false;
       });
 
+      _timer?.cancel();
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (!mounted) {
+          timer.cancel();
+          return;
+        }
         setState(() {
-          if (_remainingSeconds > 0) {
+          if (_remainingSeconds > 1) {
             _remainingSeconds--;
           } else {
+            _remainingSeconds = 0;
+            timer.cancel();
             _stopTimer();
           }
         });
@@ -155,12 +179,13 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
   }
 
   void _stopTimer() async {
+    // Ensure timer is cancelled and state reflects completion
+    _timer?.cancel();
     setState(() {
       _isTimerRunning = false;
       _isTimerPaused = false;
-      // Don't reset timer - keep it at 0 when countdown completes
+      _remainingSeconds = 0; // ensure it shows 00:00
     });
-    _timer?.cancel();
 
     // Show loading dialog while updating balance
     showDialog(

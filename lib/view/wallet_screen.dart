@@ -17,7 +17,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:zero_koin/controllers/user_controller.dart';
 import 'package:zero_koin/widgets/gradient_circular_progress_painter.dart';
 import 'package:zero_koin/view/zerokoin_buy.dart';
-import 'package:flutter/widget_previews.dart';
 
 // Mock class for demonstration purposes
 class MockSessionStatus {
@@ -27,7 +26,6 @@ class MockSessionStatus {
   MockSessionStatus({required this.accounts, required this.chainId});
 }
 
-@Preview(name: 'Wallet Screen')
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
 
