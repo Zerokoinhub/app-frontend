@@ -170,25 +170,7 @@ class HomeScreen extends StatelessWidget {
                                           child: AdWidget(ad: ad),
                                         );
                                       } else {
-                                        return Container(
-                                          width: 320,
-                                          height: 50,
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(
-                                              10,
-                                            ),
-                                            border: Border.all(
-                                              color: Colors.grey.withAlpha(80),
-                                              width: 1,
-                                            ),
-                                          ),
-                                          child: const Center(
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                            ),
-                                          ),
-                                        );
+                                        return SizedBox();
                                       }
                                     }),
                                     SizedBox(height: 14),

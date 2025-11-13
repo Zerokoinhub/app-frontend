@@ -423,28 +423,7 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                         );
                       } else {
                         // ❌ Ad not loaded yet, show placeholder
-                        return Container(
-                          width: 320,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: Colors.grey.withAlpha(
-                                77,
-                              ), // same as 0.3.toInt()
-                              width: 1,
-                            ),
-                          ),
-                          child: const Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.blue,
-                              ),
-                            ),
-                          ),
-                        );
+                        return SizedBox();
                       }
                     }),
                   ],
