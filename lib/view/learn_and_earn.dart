@@ -942,6 +942,7 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                               ),
                             ),
                             SizedBox(height: 5),
+                            //timer container
                             Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
