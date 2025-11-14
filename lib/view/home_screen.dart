@@ -4,12 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:zero_koin/controllers/theme_controller.dart';
 import 'package:zero_koin/controllers/user_controller.dart';
-import 'package:zero_koin/services/admob_service.dart';
 import 'package:zero_koin/view/invite_user_screen.dart';
 import 'package:zero_koin/view/rewards_screen.dart';
 
 import 'package:zero_koin/widgets/app_bar_container.dart';
-import 'package:zero_koin/widgets/earn_rewards.dart';
 
 import 'package:zero_koin/widgets/home_page_widgets.dart';
 import 'package:zero_koin/widgets/home_screen_widget.dart';
@@ -21,7 +19,6 @@ import 'package:zero_koin/controllers/home_controller.dart'; // Import HomeContr
 import 'package:zero_koin/controllers/session_controller.dart';
 import 'package:zero_koin/controllers/admob_controller.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'dart:developer' as developer;
 
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:math' as math;

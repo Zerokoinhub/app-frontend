@@ -398,7 +398,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 ),
               ),
               Text(
-                'ZeroKoin',
+                'ZRK',
                 style: TextStyle(
                   color: themeController.subtitleColor.withValues(alpha: 0.7),
                   fontSize: 12,

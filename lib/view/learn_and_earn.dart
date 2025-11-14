@@ -15,6 +15,7 @@ import 'package:translator_plus/translator_plus.dart';
 import 'package:zero_koin/services/api_service.dart'; // Import ApiService
 import 'package:zero_koin/controllers/admob_controller.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LearnAndEarn extends StatefulWidget {
   const LearnAndEarn({super.key});
@@ -65,10 +66,11 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
       // Initial load of translated course names
       _loadTranslatedCourseNames();
 
-      // Listen to changes in the selected course and reset timer
+      // Listen to changes in the selected course and restore last saved page
       _courseWorker = ever(_courseController.currentCourse, (callback) {
         if (mounted) {
-          _resetTimerForNewCourse(); // This will reset to first page with correct time
+          // Load saved page index for the newly selected course (if any)
+          _loadSavedPageIndexForCourse();
           _translateCourseContent();
         }
       });
@@ -85,7 +87,7 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
 
       // Initial translation and timer setup
       _translateCourseContent();
-      _resetTimerForNewCourse(); // Set initial timer based on current course
+      _loadSavedPageIndexForCourse(); // Restore last page and set timer for current course
     });
   }
 
@@ -94,6 +96,8 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
     _scrollController.removeListener(_updateScrollPosition);
     _scrollController.dispose();
     _timer?.cancel();
+    // Save current page before disposing
+    _saveCurrentPageIndex();
     _courseWorker?.dispose();
     _languageWorker?.dispose();
     super.dispose();
@@ -299,6 +303,62 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
       _currentPageIndex = 0; // Reset page index when course changes
     });
     _resetTimer();
+  }
+
+  // Save the current page index for the active course
+  Future<void> _saveCurrentPageIndex() async {
+    try {
+      final course = _courseController.currentCourse.value;
+      if (course == null) return;
+
+      // Use the first page title as a course-unique key fallback
+      final identifier =
+          (course.pages.isNotEmpty &&
+                  course.pages.first.title != null &&
+                  course.pages.first.title!.isNotEmpty)
+              ? course.pages.first.title!.replaceAll(' ', '_')
+              : 'course_${course.hashCode}';
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('learn_page_$identifier', _currentPageIndex);
+    } catch (e) {
+      // ignore errors silently
+      print('Failed to save page index: $e');
+    }
+  }
+
+  // Load saved page index for the active course and apply it
+  Future<void> _loadSavedPageIndexForCourse() async {
+    try {
+      final course = _courseController.currentCourse.value;
+      if (course == null) return;
+
+      final identifier =
+          (course.pages.isNotEmpty &&
+                  course.pages.first.title != null &&
+                  course.pages.first.title!.isNotEmpty)
+              ? course.pages.first.title!.replaceAll(' ', '_')
+              : 'course_${course.hashCode}';
+
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getInt('learn_page_$identifier') ?? 0;
+
+      // clamp to valid range
+      final maxIndex = course.pages.isNotEmpty ? course.pages.length - 1 : 0;
+      final newIndex = saved.clamp(0, maxIndex).toInt();
+
+      setState(() {
+        _currentPageIndex = newIndex;
+      });
+
+      // Reset timer for loaded page
+      _resetTimer();
+      await _translateCourseContent();
+    } catch (e) {
+      print('Failed to load saved page index: $e');
+      // Fallback: reset to first page
+      _resetTimerForNewCourse();
+    }
   }
 
   Future<void> _loadTranslatedCourseNames() async {
@@ -1051,12 +1111,13 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                         0xFF0682A2,
                                       ), // Added const
                                     ),
-                                    onPressed: () {
+                                    onPressed: () async {
                                       if (_currentPageIndex > 0) {
                                         setState(() {
                                           _currentPageIndex--;
                                         });
                                         _resetTimer(); // Reset timer with correct page duration
+                                        await _saveCurrentPageIndex();
                                       }
                                     },
                                     child: Obx(
@@ -1093,7 +1154,7 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                     ),
                                     onPressed:
                                         _remainingSeconds == 0
-                                            ? () {
+                                            ? () async {
                                               // Add your next button functionality here
                                               print(
                                                 "Next button pressed - Timer completed!",
@@ -1109,6 +1170,7 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                                   _currentPageIndex++;
                                                 });
                                                 _resetTimer(); // Reset timer with correct page duration
+                                                await _saveCurrentPageIndex();
                                               }
                                             }
                                             : null,
