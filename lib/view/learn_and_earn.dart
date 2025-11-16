@@ -903,14 +903,13 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                               _courseController
                                                   .currentCourse
                                                   .value;
+
                                           if (course == null ||
                                               course.pages.isEmpty ||
                                               _currentPageIndex >=
                                                   course.pages.length) {
                                             return Text(
-                                              languageController.getTranslation(
-                                                "block_number",
-                                              ),
+                                              "Block Number",
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
@@ -918,13 +917,18 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                               ),
                                             );
                                           }
+
+                                          // Get original title from backend
+                                          final String originalTitle =
+                                              course
+                                                  .pages[_currentPageIndex]
+                                                  .title ??
+                                              "";
+
                                           return Text(
-                                            _translatedTitle.isNotEmpty
-                                                ? _translatedTitle
-                                                : (course
-                                                        .pages[_currentPageIndex]
-                                                        .title ??
-                                                    ''),
+                                            originalTitle, // directly show backend title
+                                            textAlign: TextAlign.start,
+                                            softWrap: true,
                                             style: const TextStyle(
                                               color: Colors.white,
                                               fontWeight: FontWeight.bold,

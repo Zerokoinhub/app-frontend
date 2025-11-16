@@ -253,7 +253,7 @@ class InviteUserScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               foregroundColor: const Color(0xFF0682A2),
-                              backgroundColor: Colors.black,
+                              backgroundColor: Colors.black12,
                             ),
                             onPressed: () async {
                               if (userController.inviteCode.value.isEmpty) {
@@ -315,8 +315,8 @@ class InviteUserScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: themeController.contentBackgroundColor,
                         borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(30),
-                          topRight: Radius.circular(30),
+                          topLeft: Radius.circular(12),
+                          topRight: Radius.circular(12),
                         ),
                       ),
                       child: Padding(
@@ -342,16 +342,17 @@ class InviteUserScreen extends StatelessWidget {
                               ],
                             ),
                             SizedBox(height: screenHeight * 0.03),
-                            Column(
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 const WalletWidget(
-                                  title: "References Amount",
-                                  hintText: "50",
+                                  title: "Referral Users",
+                                  hintText: "00",
                                 ),
-                                SizedBox(height: screenHeight * 0.02),
+
                                 Obx(
                                   () => WalletWidget(
-                                    title: "Recent Amount",
+                                    title: "Rewards Earned",
                                     hintText:
                                         userController.recentAmount.toString(),
                                   ),
