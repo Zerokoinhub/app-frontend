@@ -59,44 +59,37 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _waitForAdsAndNavigate() {
-    // Set minimum splash screen duration (3 seconds)
-    final minimumDuration = Future.delayed(const Duration(seconds: 3));
+    // Set minimum splash screen duration (1.5 seconds - reduced for faster startup)
+    final minimumDuration = Future.delayed(const Duration(milliseconds: 1500));
 
-    // Wait for all banner ads to load
-    final adsLoaded = _waitForAllAdsToLoad();
+    // Don't wait for ads - load them in background after navigation
+    // This dramatically speeds up startup
+    _loadAdsInBackground();
 
-    // Initialize and wait for time validation
+    // Initialize and wait for time validation (timeout: 3 seconds)
     final timeValidationReady = _initializeTimeValidation();
 
-    // Add absolute maximum timeout as a safety net (20 seconds total)
-    final maxTimeout = Future.delayed(const Duration(seconds: 20)).then((_) {
-      print('⚠️ Maximum splash screen timeout reached - forcing navigation');
-    });
-
-    // Wait for minimum duration, ads, and time validation, or maximum timeout
-    Future.any([
-      Future.wait([minimumDuration, adsLoaded, timeValidationReady]),
-      maxTimeout,
-    ]).then((_) {
-      _checkAuthAndNavigate();
-    });
+    // Wait for minimum duration and time validation
+    Future.wait([minimumDuration, timeValidationReady])
+        .then((_) {
+          _checkAuthAndNavigate();
+        })
+        .timeout(
+          const Duration(seconds: 5),
+          onTimeout: () {
+            // Timeout fallback - navigate anyway
+            print('⚠️ Navigation timeout - forcing navigation');
+            _checkAuthAndNavigate();
+          },
+        );
   }
 
-  Future<void> _waitForAllAdsToLoad() async {
-    try {
-      await Future.wait([
-        _adMobController.isBannerAdReady.stream.firstWhere((ready) => ready),
-        _adMobController.isLearnAndEarnBannerAdReady.stream.firstWhere(
-          (ready) => ready,
-        ),
-        _adMobController.isNotificationBannerAdReady.stream.firstWhere(
-          (ready) => ready,
-        ),
-      ]).timeout(const Duration(seconds: 10));
-      print("✅ All ads loaded");
-    } catch (_) {
-      print("⚠️ Ads loading timeout, proceeding anyway");
-    }
+  // Load ads in background after navigation (doesn't block splash)
+  void _loadAdsInBackground() {
+    Future.microtask(() {
+      _adMobController.loadInterstitialAd();
+      print('📱 Loading ads in background');
+    });
   }
 
   Future<void> _initializeTimeValidation() async {

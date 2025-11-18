@@ -187,6 +187,11 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
       if (mounted) {
         Navigator.of(context).pop();
 
+        // Check if this is the last page - if so, show ad after EarnRewards popup closes
+        final course = _courseController.currentCourse.value;
+        final isLastPage = course != null && 
+            _currentPageIndex == course.pages.length - 1;
+
         // Show EarnRewards popup
         showDialog(
           context: context,
@@ -200,7 +205,23 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
               ),
             );
           },
-        );
+        ).then((_) {
+          // After EarnRewards popup closes, show interstitial ad if course is completed
+          if (isLastPage && mounted) {
+            print("Course completed! Loading interstitial ad...");
+            _adMobController.loadInterstitialAd();
+            
+            // Wait for ad to load
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted && _adMobController.isInterstitialAdReady.value) {
+                print("Showing interstitial ad...");
+                _adMobController.showInterstitialAd();
+              } else if (mounted) {
+                print("Ad not ready yet");
+              }
+            });
+          }
+        });
       }
     } catch (e) {
       // Handle error - close loading dialog and show error message

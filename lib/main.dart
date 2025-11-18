@@ -16,54 +16,39 @@ import 'package:zero_koin/services/auth_service.dart';
 import 'package:zero_koin/services/notification_service.dart';
 import 'package:zero_koin/services/admob_service.dart';
 import 'package:zero_koin/services/time_validation_service.dart';
-import 'package:zero_koin/view/home_screen.dart';
-import 'package:zero_koin/view/notification_page.dart';
 import 'package:zero_koin/view/splash_screen.dart';
 import 'firebase_options.dart';
 import 'dart:developer' as developer;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MobileAds.instance.initialize().then((initializationStatus) {
-    initializationStatus.adapterStatuses.forEach((key, value) {
-      developer.log('Adapter status for $key: ${value.description}');
-    });
-  });
-  // RequestConfiguration configuration = RequestConfiguration(
-  //   testDeviceIds: ['YOUR_DEVICE_ID'],
-  // );
-  // MobileAds.instance.updateRequestConfiguration(configuration);
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // Initialize AdMob
-  await AdMobService.initialize();
 
-  // Initialize AdMobController
+  // Initialize Firebase and AdMob in parallel for faster startup
+  await Future.wait([
+    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+    AdMobService.initialize(),
+    MobileAds.instance.initialize().then((initializationStatus) {
+      initializationStatus.adapterStatuses.forEach((key, value) {
+        developer.log('Adapter status for $key: ${value.description}');
+      });
+    }),
+  ]);
+
+  // Initialize essential controllers only (fast startup)
+  Get.put(TimeValidationService()); // Required early
+  Get.put(ThemeController()); // UI needs this
+  Get.put(AuthService()); // Auth check needed
+
+  // Initialize AdMob separately for ads
   Get.put(AdMobController());
 
-  // Initialize TimeValidationService first (required by SessionController)
-  Get.put(TimeValidationService());
-
-  // Initialize ThemeController
-  Get.put(ThemeController());
-
-  // Initialize AuthService
-  Get.put(AuthService());
-
-  // Initialize UserController
-  Get.put(UserController());
-
-  // Initialize UserStatsController
-  Get.put(UserStatsController());
-
-  // Initialize CourseController
-  Get.put(CourseController());
-
-  // Initialize NotificationController
-  Get.put(NotificationController());
-
-  // Initialize NotificationService
-  Get.put(NotificationService());
-  Get.put(SessionController());
+  // Lazy initialize other controllers after splash (faster startup)
+  Get.lazyPut(() => UserController(), fenix: true);
+  Get.lazyPut(() => UserStatsController(), fenix: true);
+  Get.lazyPut(() => CourseController(), fenix: true);
+  Get.lazyPut(() => NotificationController(), fenix: true);
+  Get.lazyPut(() => NotificationService(), fenix: true);
+  Get.lazyPut(() => SessionController(), fenix: true);
 
   // Set status bar to light content (white text/icons)
   SystemChrome.setSystemUIOverlayStyle(
