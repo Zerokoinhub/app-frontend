@@ -11,7 +11,6 @@ import 'package:zero_koin/controllers/user_stats_controller.dart';
 import 'package:zero_koin/controllers/course_controller.dart'; // Import CourseController
 import 'package:zero_koin/controllers/notification_controller.dart'; // Import NotificationController
 import 'package:zero_koin/controllers/session_controller.dart'; // Import SessionController
-import 'package:zero_koin/controller/language_controller.dart'; // Import LanguageController
 import 'package:zero_koin/controllers/admob_controller.dart'; // Import AdMobController
 import 'package:zero_koin/services/auth_service.dart';
 import 'package:zero_koin/services/notification_service.dart';
@@ -52,9 +51,6 @@ void main() async {
 
   // Initialize UserController
   Get.put(UserController());
-
-  // Initialize LanguageController
-  Get.put(LanguageController());
 
   // Initialize UserStatsController
   Get.put(UserStatsController());

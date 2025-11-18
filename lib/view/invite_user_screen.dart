@@ -131,7 +131,7 @@ class InviteUserScreen extends StatelessWidget {
                                                   child:
                                                       CircularProgressIndicator(
                                                         strokeWidth: 2,
-                                                        color: Colors.white
+                                                        color: Colors.white 
                                                             .withValues(
                                                               alpha: 0.8,
                                                             ),

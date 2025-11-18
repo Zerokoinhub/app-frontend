@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:zero_koin/controller/language_controller.dart';
 import 'package:zero_koin/controllers/theme_controller.dart';
 import 'package:zero_koin/controllers/course_controller.dart'; // Import CourseController
 import 'package:zero_koin/view/bottom_bar.dart';
@@ -11,7 +11,6 @@ import 'package:zero_koin/widgets/app_bar_container.dart';
 import 'package:zero_koin/widgets/learn_and_earn_widget.dart';
 import 'package:zero_koin/widgets/my_drawer.dart';
 import 'package:zero_koin/widgets/earn_rewards.dart';
-import 'package:translator_plus/translator_plus.dart';
 import 'package:zero_koin/services/api_service.dart'; // Import ApiService
 import 'package:zero_koin/controllers/admob_controller.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -25,10 +24,9 @@ class LearnAndEarn extends StatefulWidget {
 }
 
 class CourseCategoryData {
-  final String originalName;
-  final String translatedName;
+  final String name;
 
-  CourseCategoryData(this.originalName, this.translatedName);
+  CourseCategoryData(this.name);
 }
 
 class _LearnAndEarnState extends State<LearnAndEarn> {
@@ -39,12 +37,6 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
       Get.find<CourseController>(); // Get instance of CourseController
   final AdMobController _adMobController = Get.find<AdMobController>();
 
-  final GoogleTranslator _translator = GoogleTranslator();
-  String _translatedTitle = '';
-  String _translatedContent = '';
-  List<CourseCategoryData> _translatedCourseCategories =
-      []; // New state variable
-
   // Timer variables
   Timer? _timer;
   int _remainingSeconds = 120; // Default 2 minutes = 120 seconds
@@ -53,7 +45,6 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
 
   // Workers for reactive listeners
   Worker? _courseWorker;
-  Worker? _languageWorker;
 
   @override
   void initState() {
@@ -63,31 +54,16 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
 
     // Wait for the widget to be built before setting up listeners
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Initial load of translated course names
-      _loadTranslatedCourseNames();
-
       // Listen to changes in the selected course and restore last saved page
       _courseWorker = ever(_courseController.currentCourse, (callback) {
         if (mounted) {
           // Load saved page index for the newly selected course (if any)
           _loadSavedPageIndexForCourse();
-          _translateCourseContent();
         }
       });
 
-      // Listen to language changes and translate content
-      _languageWorker = ever(Get.find<LanguageController>().selectedLanguage, (
-        callback,
-      ) {
-        if (mounted) {
-          _translateCourseContent();
-          _loadTranslatedCourseNames(); // Re-load course names on language change
-        }
-      });
-
-      // Initial translation and timer setup
-      _translateCourseContent();
-      _loadSavedPageIndexForCourse(); // Restore last page and set timer for current course
+      // Restore last page and set timer for current course
+      _loadSavedPageIndexForCourse();
     });
   }
 
@@ -99,7 +75,6 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
     // Save current page before disposing
     _saveCurrentPageIndex();
     _courseWorker?.dispose();
-    _languageWorker?.dispose();
     super.dispose();
   }
 
@@ -254,8 +229,29 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
     }
 
     try {
+      // Check if it's JSON format (from backend)
+      if (timeString.startsWith('{')) {
+        final Map<String, dynamic> timeJson = jsonDecode(timeString);
+        final int value =
+            timeJson['value'] is int
+                ? timeJson['value']
+                : int.parse(timeJson['value'].toString());
+        final String unit = timeJson['unit'].toString().toLowerCase();
+
+        // Convert to seconds based on unit
+        switch (unit) {
+          case 'seconds':
+            return value;
+          case 'minutes':
+            return value * 60;
+          case 'hours':
+            return value * 3600;
+          default:
+            return 120; // Default if unit is unknown
+        }
+      }
       // Check if it contains a colon (MM:SS format)
-      if (timeString.contains(':')) {
+      else if (timeString.contains(':')) {
         final parts = timeString.split(':');
         if (parts.length == 2) {
           final minutes = int.parse(parts[0]);
@@ -294,7 +290,6 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
       _timer?.cancel();
       // Don't reset page index here when just resetting timer for current page
     });
-    _translateCourseContent();
   }
 
   // Method to reset timer when course changes (resets to first page)
@@ -353,81 +348,10 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
 
       // Reset timer for loaded page
       _resetTimer();
-      await _translateCourseContent();
     } catch (e) {
       print('Failed to load saved page index: $e');
       // Fallback: reset to first page
       _resetTimerForNewCourse();
-    }
-  }
-
-  Future<void> _loadTranslatedCourseNames() async {
-    final LanguageController languageController =
-        Get.find<LanguageController>();
-    final String targetLanguageCode = languageController.getLanguageCode(
-      languageController.selectedLanguage.value,
-    );
-    final List<String> originalCourseNames = _courseController.courseNames;
-    List<CourseCategoryData> categories = [];
-
-    for (String name in originalCourseNames) {
-      try {
-        final Translation translation = await _translator.translate(
-          name,
-          to: targetLanguageCode,
-        );
-        categories.add(CourseCategoryData(name, translation.text));
-      } catch (e) {
-        print('Translation error for course name "$name": $e');
-        categories.add(
-          CourseCategoryData(name, name),
-        ); // Fallback to original name on error
-      }
-    }
-    setState(() {
-      _translatedCourseCategories = categories;
-    });
-  }
-
-  Future<void> _translateCourseContent() async {
-    final LanguageController languageController =
-        Get.find<LanguageController>();
-    final String targetLanguageCode = languageController.getLanguageCode(
-      languageController.selectedLanguage.value,
-    );
-    final course = _courseController.currentCourse.value;
-
-    if (course != null && course.pages.isNotEmpty) {
-      final String originalTitle = course.pages[_currentPageIndex].title ?? '';
-      final String originalContent =
-          course.pages[_currentPageIndex].content ?? '';
-
-      try {
-        final Translation titleTranslation = await _translator.translate(
-          originalTitle,
-          to: targetLanguageCode,
-        );
-        final Translation contentTranslation = await _translator.translate(
-          originalContent,
-          to: targetLanguageCode,
-        );
-
-        setState(() {
-          _translatedTitle = titleTranslation.text;
-          _translatedContent = contentTranslation.text;
-        });
-      } catch (e) {
-        print('Translation error: $e');
-        setState(() {
-          _translatedTitle = originalTitle;
-          _translatedContent = originalContent;
-        });
-      }
-    } else {
-      setState(() {
-        _translatedTitle = '';
-        _translatedContent = '';
-      });
     }
   }
 
@@ -436,8 +360,6 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     final ThemeController themeController = Get.find<ThemeController>();
-    final LanguageController languageController =
-        Get.find<LanguageController>(); // Get instance instead of putting
 
     return Scaffold(
       drawer: const MyDrawer(),
@@ -477,14 +399,12 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                           ),
                         ),
                         const SizedBox(width: 20),
-                        Obx(
-                          () => Text(
-                            languageController.getTranslation("back"),
-                            style: const TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                        const Text(
+                          "Back",
+                          style: TextStyle(
+                            fontSize: 25,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                       ],
@@ -537,236 +457,11 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
                                   children: [
-                                    // Language selector
-                                    Container(
-                                      width: 150,
-                                      height: 35,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        border: Border.all(
-                                          color: const Color(0xFF0682A2),
-                                          width: 2,
-                                        ),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                        ),
-                                        child: Row(
-                                          children: [
-                                            Image.asset(
-                                              "assets/language.png",
-                                              width: 18,
-                                              height: 18,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Expanded(
-                                              child: Obx(
-                                                () => DropdownButton<String>(
-                                                  value:
-                                                      languageController
-                                                                  .selectedLanguage
-                                                                  .value ==
-                                                              "Language"
-                                                          ? null
-                                                          : languageController
-                                                              .selectedLanguage
-                                                              .value,
-                                                  hint: Obx(
-                                                    () => Text(
-                                                      languageController
-                                                          .getTranslation(
-                                                            "language",
-                                                          ),
-                                                      style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize:
-                                                            screenWidth < 360
-                                                                ? 11
-                                                                : 13,
-                                                        color:
-                                                            themeController
-                                                                .textColor,
-                                                      ),
-                                                      textDirection:
-                                                          languageController
-                                                                          .selectedLanguage
-                                                                          .value ==
-                                                                      "Urdu" ||
-                                                                  languageController
-                                                                          .selectedLanguage
-                                                                          .value ==
-                                                                      "Arabic"
-                                                              ? TextDirection
-                                                                  .rtl
-                                                              : TextDirection
-                                                                  .ltr,
-                                                    ),
-                                                  ),
-                                                  isExpanded: true,
-                                                  underline: const SizedBox(),
-                                                  icon: Icon(
-                                                    Icons.arrow_drop_down,
-                                                    color:
-                                                        themeController
-                                                            .textColor,
-                                                    size: 20,
-                                                  ),
-                                                  selectedItemBuilder: (
-                                                    BuildContext context,
-                                                  ) {
-                                                    return languageController.languages.map<
-                                                      Widget
-                                                    >((String language) {
-                                                      bool isRTL =
-                                                          language == "Urdu" ||
-                                                          language == "Arabic";
-                                                      return Container(
-                                                        alignment:
-                                                            Alignment
-                                                                .centerLeft,
-                                                        child: Text(
-                                                          language,
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize:
-                                                                screenWidth <
-                                                                        360
-                                                                    ? 11
-                                                                    : 13,
-                                                            color:
-                                                                themeController
-                                                                    .textColor,
-                                                          ),
-                                                          textDirection:
-                                                              isRTL
-                                                                  ? TextDirection
-                                                                      .rtl
-                                                                  : TextDirection
-                                                                      .ltr,
-                                                        ),
-                                                      );
-                                                    }).toList();
-                                                  },
-                                                  dropdownColor:
-                                                      themeController
-                                                          .contentBackgroundColor,
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize:
-                                                        screenWidth < 360
-                                                            ? 11
-                                                            : 13,
-                                                    color:
-                                                        themeController
-                                                            .textColor,
-                                                  ),
-                                                  items:
-                                                      languageController.languages.asMap().entries.map((
-                                                        entry,
-                                                      ) {
-                                                        // int index = entry.key;
-                                                        String language =
-                                                            entry.value;
-                                                        // bool isLastItem =
-                                                        //     index ==
-                                                        //     controller
-                                                        //             .languages
-                                                        //             .length -
-                                                        //         1;
-
-                                                        return DropdownMenuItem<
-                                                          String
-                                                        >(
-                                                          value: language,
-                                                          child: Container(
-                                                            width:
-                                                                double.infinity,
-                                                            margin:
-                                                                const EdgeInsets.symmetric(
-                                                                  vertical: 4.0,
-                                                                  horizontal:
-                                                                      8.0,
-                                                                ),
-                                                            padding:
-                                                                const EdgeInsets.symmetric(
-                                                                  vertical:
-                                                                      12.0,
-                                                                  horizontal:
-                                                                      16.0,
-                                                                ),
-                                                            decoration: BoxDecoration(
-                                                              border: Border.all(
-                                                                color:
-                                                                    const Color(
-                                                                      0xFFC4B0B0,
-                                                                    ),
-                                                                width: 1.0,
-                                                              ),
-                                                              borderRadius:
-                                                                  BorderRadius.circular(
-                                                                    8.0,
-                                                                  ),
-                                                            ),
-                                                            child: Align(
-                                                              alignment:
-                                                                  Alignment
-                                                                      .centerLeft,
-                                                              child: Text(
-                                                                language,
-                                                                style: TextStyle(
-                                                                  fontSize:
-                                                                      screenWidth <
-                                                                              360
-                                                                          ? 11
-                                                                          : 13,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color:
-                                                                      themeController
-                                                                          .textColor,
-                                                                ),
-                                                                textDirection:
-                                                                    language ==
-                                                                                "Urdu" ||
-                                                                            language ==
-                                                                                "Arabic"
-                                                                        ? TextDirection
-                                                                            .rtl
-                                                                        : TextDirection
-                                                                            .ltr,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        );
-                                                      }).toList(),
-                                                  onChanged: (
-                                                    String? newValue,
-                                                  ) {
-                                                    if (newValue != null) {
-                                                      languageController
-                                                          .selectLanguage(
-                                                            newValue,
-                                                          );
-                                                    }
-                                                  },
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    // Dynamic Course Categories
                                     Row(
                                       children:
-                                          _translatedCourseCategories
+                                          _courseController.courseNames
                                               .map(
-                                                (categoryData) => Padding(
+                                                (courseName) => Padding(
                                                   padding:
                                                       const EdgeInsets.only(
                                                         right: 12.0,
@@ -774,17 +469,13 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                                   child: SizedBox(
                                                     width: 150,
                                                     child: LearnAndEarnWidget(
-                                                      title:
-                                                          categoryData
-                                                              .translatedName,
-                                                      originalTitle:
-                                                          categoryData
-                                                              .originalName,
-                                                      isSelected: _courseController
-                                                          .isCategorySelected(
-                                                            categoryData
-                                                                .originalName,
-                                                          ),
+                                                      title: courseName,
+                                                      originalTitle: courseName,
+                                                      isSelected:
+                                                          _courseController
+                                                              .isCategorySelected(
+                                                                courseName,
+                                                              ),
                                                       onPressed: () async {
                                                         showDialog(
                                                           context: context,
@@ -810,10 +501,8 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                                         );
                                                         _courseController
                                                             .selectCategory(
-                                                              categoryData
-                                                                  .originalName,
+                                                              courseName,
                                                             );
-                                                        await _translateCourseContent();
                                                         if (mounted) {
                                                           Navigator.of(
                                                             context,
@@ -835,19 +524,15 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                             Row(
                               children: [
                                 Expanded(
-                                  child: Obx(
-                                    () => Text(
-                                      languageController.getTranslation(
-                                        "earn_koins_daily",
-                                      ),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: screenWidth < 360 ? 16 : 18,
-                                        color: themeController.textColor,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.visible,
+                                  child: Text(
+                                    "Earn Coins Daily",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: screenWidth < 360 ? 16 : 18,
+                                      color: themeController.textColor,
                                     ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.visible,
                                   ),
                                 ),
                               ],
@@ -879,9 +564,7 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                           if (course == null ||
                                               course.pages.isEmpty) {
                                             return Text(
-                                              languageController.getTranslation(
-                                                "no_content_available",
-                                              ),
+                                              "No content available",
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
@@ -964,10 +647,7 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                                     _currentPageIndex >=
                                                         course.pages.length) {
                                                   return Text(
-                                                    languageController
-                                                        .getTranslation(
-                                                          "select_a_course",
-                                                        ),
+                                                    "Please select a course",
                                                     style: const TextStyle(
                                                       color: Colors.white,
                                                       fontSize: 14,
@@ -976,12 +656,10 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                                   );
                                                 }
                                                 return Text(
-                                                  _translatedContent.isNotEmpty
-                                                      ? _translatedContent
-                                                      : (course
-                                                              .pages[_currentPageIndex]
-                                                              .content ??
-                                                          ''),
+                                                  course
+                                                          .pages[_currentPageIndex]
+                                                          .content ??
+                                                      '',
                                                   style: const TextStyle(
                                                     color: Colors.white,
                                                     fontSize: 14,
@@ -1025,15 +703,9 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Obx(
-                                          () => Text(
-                                            languageController.getTranslation(
-                                              "timer",
-                                            ),
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                            ),
-                                          ),
+                                        const Text(
+                                          "Timer",
+                                          style: TextStyle(color: Colors.white),
                                         ),
                                         Text(
                                           _formatTime(_remainingSeconds),
@@ -1124,13 +796,7 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                         await _saveCurrentPageIndex();
                                       }
                                     },
-                                    child: Obx(
-                                      () => Text(
-                                        languageController.getTranslation(
-                                          "previous",
-                                        ),
-                                      ),
-                                    ),
+                                    child: const Text("Previous"),
                                   ),
                                 ),
                                 SizedBox(
@@ -1167,24 +833,41 @@ class _LearnAndEarnState extends State<LearnAndEarn> {
                                                   _courseController
                                                       .currentCourse
                                                       .value;
-                                              if (course != null &&
-                                                  _currentPageIndex <
-                                                      course.pages.length - 1) {
-                                                setState(() {
-                                                  _currentPageIndex++;
-                                                });
-                                                _resetTimer(); // Reset timer with correct page duration
-                                                await _saveCurrentPageIndex();
+                                              if (course != null) {
+                                                // Check if this is the last page
+                                                if (_currentPageIndex ==
+                                                    course.pages.length - 1) {
+                                                  // Course completed - show interstitial ad
+                                                  print(
+                                                    "Course completed! Showing interstitial ad...",
+                                                  );
+                                                  _adMobController
+                                                      .loadInterstitialAd();
+                                                  // Wait a moment for ad to load
+                                                  await Future.delayed(
+                                                    const Duration(
+                                                      milliseconds: 500,
+                                                    ),
+                                                  );
+                                                  if (_adMobController
+                                                      .isInterstitialAdReady
+                                                      .value) {
+                                                    _adMobController
+                                                        .showInterstitialAd();
+                                                  }
+                                                } else if (_currentPageIndex <
+                                                    course.pages.length - 1) {
+                                                  // Not the last page - go to next page
+                                                  setState(() {
+                                                    _currentPageIndex++;
+                                                  });
+                                                  _resetTimer(); // Reset timer with correct page duration
+                                                  await _saveCurrentPageIndex();
+                                                }
                                               }
                                             }
                                             : null,
-                                    child: Obx(
-                                      () => Text(
-                                        languageController.getTranslation(
-                                          "next",
-                                        ),
-                                      ),
-                                    ),
+                                    child: const Text("Next"),
                                   ),
                                 ),
                               ],
