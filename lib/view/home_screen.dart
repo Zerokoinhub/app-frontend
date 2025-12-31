@@ -22,7 +22,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:math' as math;
-
+import 'package:zero_koin/view/Invite_friend_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -227,7 +227,7 @@ class HomeScreen extends StatelessWidget {
                                     SizedBox(height: 10),
                                     HomePageWidgets(
                                       onPressed: () {
-                                        Get.to(() => const InviteUserScreen());
+                                        Get.to(() => const InviteScreen ());
                                       },
                                       title: "Invite to Friend",
                                       subtitle:

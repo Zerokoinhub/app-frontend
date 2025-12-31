@@ -72,7 +72,7 @@ class _DrawerWidgetState extends State<DrawerWidget> {
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 child: Row(
                   children: [
-                    widget.imageUrl == "assets/whitepaper.png"
+                    widget.imageUrl == "assets/document (1).png"
                         ? ImageFiltered(
                           imageFilter: ImageFilter.blur(
                             sigmaX: 0.7,

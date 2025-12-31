@@ -48,6 +48,17 @@ flutter:
     - assets/
     - assets/Rocket.png
 
+  fonts:
+    - family: Coolvetica
+      fonts:
+        - asset: assets/Fonts/coolvetica.regular.otf
+    - family: Poppins-regular
+      fonts:
+        - asset: assets/Fonts/Poppins-Regular.ttf
+    - family: Poppins
+      fonts:
+        - asset: assets/Fonts/Poppins-Medium.ttf
+
 flutter_launcher_icons:
   android: true
   ios: true

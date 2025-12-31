@@ -233,7 +233,7 @@ class _SplashScreenState extends State<SplashScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '© 2024 - 2025 Zero Koin',
+                  '© 2025 - 2026 Zero Koin',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.8),

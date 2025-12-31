@@ -10,7 +10,7 @@ import 'package:zero_koin/widgets/app_bar_container.dart';
 import 'package:zero_koin/widgets/rewards_widget.dart';
 import 'package:zero_koin/widgets/my_drawer.dart';
 import 'package:zero_koin/widgets/gradient_circular_progress_painter.dart';
-
+import 'package:zero_koin/view/Invite_friend_screen.dart';
 class RewardsScreen extends StatelessWidget {
   const RewardsScreen({super.key});
 
@@ -281,7 +281,7 @@ class RewardsScreen extends StatelessWidget {
                               SizedBox(height: 20),
                               RewardsWidget(
                                 onPressed: () {
-                                  Get.to(() => const InviteUserScreen());
+                                  Get.to(() => const InviteScreen());
                                 },
                                 imageUrl: "assets/Vector (3).svg",
                                 title: "Invite Friends",

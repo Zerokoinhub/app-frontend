@@ -315,7 +315,7 @@ class MyDrawer extends StatelessWidget {
                               },
                             ),
                             DrawerWidget(
-                              imageUrl: "assets/whitepaper.png",
+                              imageUrl: "assets/document (1).png",
                               title: "Whitepaper",
                               onPressed: () async {
                                 final Uri url = Uri.parse(

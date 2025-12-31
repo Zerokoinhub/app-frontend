@@ -7,8 +7,8 @@ import 'package:zero_koin/view/home_screen.dart';
 import 'package:zero_koin/view/learn_and_earn.dart';
 import 'package:zero_koin/view/user_profile_screen.dart';
 import 'package:zero_koin/view/wallet_screen.dart';
-import 'package:zero_koin/controllers/home_controller.dart'; // Import HomeController
-import 'package:get/get.dart'; // Import GetX
+import 'package:zero_koin/controllers/home_controller.dart';
+import 'package:get/get.dart';
 
 class BottomBar extends StatefulWidget {
   final int initialIndex;
@@ -20,11 +20,21 @@ class BottomBar extends StatefulWidget {
 
 class _BottomBarState extends State<BottomBar> {
   late int _currentIndex;
+  final GlobalKey<CurvedNavigationBarState> _bottomNavigationKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Ensure the current index is valid
+    if (_currentIndex >= _pages.length) {
+      _currentIndex = 0;
+    }
   }
 
   final List<Widget> _pages = [
@@ -37,84 +47,76 @@ class _BottomBarState extends State<BottomBar> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop:
-          _currentIndex == 0 &&
-          !Navigator.canPop(
-            context,
-          ), // Only allow app to close when on home screen and no previous routes
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) {
-          if (Navigator.canPop(context)) {
-            // If there are previous routes in the stack, go back normally
-            Navigator.pop(context);
-          } else if (_currentIndex != 0) {
-            // If no previous routes and not on home screen, navigate to home screen
-            setState(() {
-              _currentIndex = 0;
-            });
+    return Scaffold(
+      body: _pages[_currentIndex],
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return CurvedNavigationBar(
+      key: _bottomNavigationKey,
+      index: _currentIndex,
+      backgroundColor: Color.fromARGB(255, 29, 28, 28),
+      buttonBackgroundColor: Color(0xFF0682A2),
+      color: Colors.black,
+      height: 60,
+      animationDuration: Duration(milliseconds: 300),
+      animationCurve: Curves.easeInOut,
+      items: <Widget>[
+        SvgPicture.asset(
+          'assets/Home Button Icon.svg',
+          width: 24,
+          height: 24,
+          colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+        ),
+        Image(
+          image: AssetImage('assets/wallet.png'),
+          color: Colors.white,
+          width: 24,
+          height: 24,
+          colorBlendMode: BlendMode.srcIn,
+        ),
+        Image(
+          image: AssetImage('assets/education.png'),
+          color: Colors.white,
+          width: 24,
+          height: 24,
+          colorBlendMode: BlendMode.srcIn,
+        ),
+        Image(
+          image: AssetImage('assets/calculator.png'),
+          color: Colors.white,
+          width: 24,
+          height: 24,
+          colorBlendMode: BlendMode.srcIn,
+        ),
+        Image(
+          image: AssetImage('assets/user_profile.png'),
+          color: Colors.white,
+          width: 24,
+          height: 24,
+          colorBlendMode: BlendMode.srcIn,
+        ),
+      ],
+      onTap: (index) {
+        // Prevent duplicate taps
+        if (_currentIndex != index) {
+          setState(() {
+            _currentIndex = index;
+          });
+          
+          // Trigger refresh data on HomeController when home is tapped
+          if (index == 0) {
+            try {
+              final HomeController homeController = Get.find<HomeController>();
+              homeController.refreshData();
+            } catch (e) {
+              print("HomeController not found: $e");
+            }
           }
         }
       },
-      child: Scaffold(
-        body: _pages[_currentIndex],
-        bottomNavigationBar: CurvedNavigationBar(
-          index: _currentIndex,
-          backgroundColor: Color.fromARGB(255, 29, 28, 28),
-          buttonBackgroundColor: Color(0xFF0682A2),
-          color: Colors.black,
-          height: 60,
-          items: <Widget>[
-            SvgPicture.asset(
-              'assets/Home Button Icon.svg',
-              width: 24,
-              height: 24,
-              colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
-            ),
-            Image(
-              image: AssetImage('assets/wallet.png'),
-              color: Colors.white,
-              width: 24,
-              height: 24,
-              colorBlendMode: BlendMode.srcIn,
-            ),
-            Image(
-              image: AssetImage('assets/education.png'),
-              color: Colors.white,
-              width: 24,
-              height: 24,
-              colorBlendMode: BlendMode.srcIn,
-            ),
-            Image(
-              image: AssetImage('assets/calculator.png'),
-              color: Colors.white,
-              width: 24,
-              height: 24,
-              colorBlendMode: BlendMode.srcIn,
-            ),
-            Image(
-              image: AssetImage('assets/user_profile.png'),
-              color: Colors.white,
-              width: 24,
-              height: 24,
-              colorBlendMode: BlendMode.srcIn,
-            ),
-          ],
-          onTap: (index) {
-            setState(() {
-              // If the tapped index is the home button
-              if (index == 0) {
-                // Trigger refresh data on HomeController
-                final HomeController homeController =
-                    Get.find<HomeController>();
-
-                homeController.refreshData();
-              }
-              _currentIndex = index;
-            });
-          },
-        ),
-      ),
     );
   }
 }
