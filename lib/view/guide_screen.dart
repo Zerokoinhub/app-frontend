@@ -4,7 +4,6 @@ import 'package:zero_koin/controllers/theme_controller.dart';
 import 'package:zero_koin/widgets/app_bar_container.dart';
 import 'package:zero_koin/widgets/guide_text.dart';
 import 'package:zero_koin/widgets/my_drawer.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:zero_koin/view/bottom_bar.dart';
 

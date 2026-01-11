@@ -248,7 +248,7 @@ class SessionController extends GetxController {
         final remaining = nextUnlockAt.difference(now).inSeconds;
 
         print(
-          'Session ${session['sessionNumber']} countdown: ${remaining} seconds remaining',
+          'Session ${session['sessionNumber']} countdown: $remaining seconds remaining',
         );
 
         if (remaining > 0) {

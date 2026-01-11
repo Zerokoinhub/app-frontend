@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 class CoursePage {
   final String? title;

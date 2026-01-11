@@ -27,7 +27,7 @@ class AuthService extends GetxController {
     // Listen to auth state changes
     user.bindStream(_auth.authStateChanges());
   }
-
+Stream<User?> get userStream => _auth.authStateChanges();
   // Check if user is signed in
   bool get isSignedIn => user.value != null;
 

@@ -4,7 +4,7 @@ import '../services/notification_service.dart';
 import '../controllers/user_controller.dart';
 
 class FCMTestWidget extends StatelessWidget {
-  const FCMTestWidget({Key? key}) : super(key: key);
+  const FCMTestWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

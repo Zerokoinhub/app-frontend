@@ -6,9 +6,9 @@ class DeviceAuthWarningDialog extends StatelessWidget {
   final VoidCallback onOkay;
 
   const DeviceAuthWarningDialog({
-    Key? key,
+    super.key,
     required this.onOkay,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

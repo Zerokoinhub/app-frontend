@@ -1,7 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:zero_koin/controllers/admob_controller.dart';
 import 'package:zero_koin/view/calculator_screen.dart';
 import 'package:zero_koin/view/home_screen.dart';
 import 'package:zero_koin/view/learn_and_earn.dart';

@@ -7,6 +7,8 @@ import 'package:get/get_instance/src/extension_instance.dart';
 import 'package:zero_koin/controllers/theme_controller.dart';
 
 class FAQScreen extends StatefulWidget {
+  const FAQScreen({super.key});
+
   @override
   _FAQScreenState createState() => _FAQScreenState();
 }

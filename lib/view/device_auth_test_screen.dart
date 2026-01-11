@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../services/auth_service.dart';
 
 class DeviceAuthTestScreen extends StatefulWidget {
-  const DeviceAuthTestScreen({Key? key}) : super(key: key);
+  const DeviceAuthTestScreen({super.key});
 
   @override
   State<DeviceAuthTestScreen> createState() => _DeviceAuthTestScreenState();

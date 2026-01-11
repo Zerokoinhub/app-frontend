@@ -45,6 +45,7 @@ android {
 dependencies {
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
+    implementation ("androidx.biometric:biometric:1.2.0-alpha05")
 
     implementation("com.google.android.gms:play-services-ads:24.6.0")
     implementation("com.unity3d.ads:unity-ads:4.16.1")

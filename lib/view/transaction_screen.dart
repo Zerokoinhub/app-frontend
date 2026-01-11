@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:zero_koin/controllers/theme_controller.dart';
 import 'package:zero_koin/controllers/admob_controller.dart';
 import 'package:zero_koin/controllers/transaction_controller.dart';
 import 'package:zero_koin/widgets/app_bar_container.dart';
 import 'package:zero_koin/widgets/my_drawer.dart';
-import 'dart:developer' as developer;
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});

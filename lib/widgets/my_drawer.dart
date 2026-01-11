@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:zero_koin/controllers/theme_controller.dart';
-import 'package:zero_koin/view/block_chain_screen.dart';
 import 'package:zero_koin/view/guide_screen.dart';
-import 'package:zero_koin/view/help_ai.dart';
 import 'package:zero_koin/view/help_support_screen.dart';
-import 'package:zero_koin/view/notification_page.dart';
 import 'package:zero_koin/view/play_store_screen.dart';
 import 'package:zero_koin/view/settings_screen.dart';
 import 'package:zero_koin/view/socail_media_pages.dart';
 import 'package:zero_koin/view/transaction_screen.dart';
-import 'package:zero_koin/view/white_paper_screen.dart';
-import 'package:zero_koin/view/zero_web_screen.dart';
 import 'package:zero_koin/view/zerokoin_buy.dart';
 import 'package:zero_koin/widgets/drawer_widget.dart';
 import 'package:flutter_svg/flutter_svg.dart';

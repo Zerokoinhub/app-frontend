@@ -119,7 +119,7 @@ Padding(
                         padding: const EdgeInsets.only(top: 60, left: 35),
                         child: Row(
                           children: [
-                            Container(
+                            SizedBox(
                               height: 75,
                               width: 75,
                               child: Stack(
@@ -453,6 +453,20 @@ Padding(
                     Container(
                       height: 45,
                       width: 330,
+                      decoration: BoxDecoration(
+                        color: themeController.cardColor,
+                        borderRadius: BorderRadius.only(
+                          bottomRight: Radius.circular(25),
+                          bottomLeft: Radius.circular(25),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: Offset(0, 8),
+                          ),
+                        ],
+                      ),
                       child: Row(
                         children: [
                           SizedBox(width: 15),
@@ -494,20 +508,6 @@ Padding(
                           SizedBox(width: 15),
                         ],
                       ),
-                      decoration: BoxDecoration(
-                        color: themeController.cardColor,
-                        borderRadius: BorderRadius.only(
-                          bottomRight: Radius.circular(25),
-                          bottomLeft: Radius.circular(25),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: Offset(0, 8),
-                          ),
-                        ],
-                      ),
                     ),
 
                     SizedBox(height: 25),
@@ -516,6 +516,18 @@ Padding(
                     Container(
                       height: 180,
                       width: 330,
+                      decoration: BoxDecoration(
+                        
+                        borderRadius: BorderRadius.circular(25),
+                        color: themeController.cardColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: Offset(0, 8),
+                          ),
+                        ],
+                      ),
                       child: Padding(
                         padding: const EdgeInsets.only(top: 20, left: 25),
                         child: Column(
@@ -602,18 +614,6 @@ Padding(
                             ),
                           ],
                         ),
-                      ),
-                      decoration: BoxDecoration(
-                        
-                        borderRadius: BorderRadius.circular(25),
-                        color: themeController.cardColor,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: Offset(0, 8),
-                          ),
-                        ],
                       ),
                     ),
 

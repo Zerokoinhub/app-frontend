@@ -1,11 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:zero_koin/view/user_registeration_screen.dart';
-import 'package:zero_koin/view/bottom_bar.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:zero_koin/services/auth_service.dart';
+import 'package:zero_koin/view/bottom_bar.dart';
+import 'package:zero_koin/view/user_registeration_screen.dart';
 import 'package:zero_koin/controllers/admob_controller.dart';
-import 'package:zero_koin/services/time_validation_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,6 +23,8 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _zoomAnimation;
   late Animation<double> _glowIntensityAnimation;
   late AdMobController _adMobController;
+  final LocalAuthentication _localAuth = LocalAuthentication();
+  Timer? _fingerprintTimer;
 
   @override
   void initState() {
@@ -30,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen>
     // Get the existing AdMobController instance
     _adMobController = Get.find<AdMobController>();
 
-    // Enhanced glow animation - matches HTML CSS glow effect
+    // Keep your original animations
     _glowController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -44,7 +47,6 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
     );
 
-    // Enhanced zoom animation - matches HTML CSS zoom effect
     _zoomController = AnimationController(
       duration: const Duration(seconds: 4),
       vsync: this,
@@ -54,90 +56,71 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _zoomController, curve: Curves.easeInOut),
     );
 
-    // Wait for all banner ads to load before navigating
-    _waitForAdsAndNavigate();
+    // Start fingerprint after 2 seconds
+    _startFingerprintAfterDelay();
   }
 
-  void _waitForAdsAndNavigate() {
-    // Set minimum splash screen duration (1.5 seconds - reduced for faster startup)
-    final minimumDuration = Future.delayed(const Duration(milliseconds: 1500));
-
-    // Don't wait for ads - load them in background after navigation
-    // This dramatically speeds up startup
-    _loadAdsInBackground();
-
-    // Initialize and wait for time validation (timeout: 3 seconds)
-    final timeValidationReady = _initializeTimeValidation();
-
-    // Wait for minimum duration and time validation
-    Future.wait([minimumDuration, timeValidationReady])
-        .then((_) {
-          _checkAuthAndNavigate();
-        })
-        .timeout(
-          const Duration(seconds: 5),
-          onTimeout: () {
-            // Timeout fallback - navigate anyway
-            print('⚠️ Navigation timeout - forcing navigation');
-            _checkAuthAndNavigate();
-          },
-        );
-  }
-
-  // Load ads in background after navigation (doesn't block splash)
-  void _loadAdsInBackground() {
-    Future.microtask(() {
-      _adMobController.loadInterstitialAd();
-      print('📱 Loading ads in background');
+  void _startFingerprintAfterDelay() {
+    _fingerprintTimer = Timer(const Duration(seconds: 2), () {
+      _triggerPhoneFingerprintSensor();
     });
   }
 
-  Future<void> _initializeTimeValidation() async {
+  Future<void> _triggerPhoneFingerprintSensor() async {
+    print('🔐 Opening phone fingerprint sensor after 2 seconds...');
+    
     try {
-      // Get the TimeValidationService instance
-      final timeValidationService = Get.find<TimeValidationService>();
+      // Check if user is logged in
+      final authService = AuthService.instance;
+      if (!authService.isSignedIn) {
+        Get.offAll(() => const UserRegisterationScreen());
+        return;
+      }
 
-      // Wait for initialization with timeout
-      await timeValidationService.waitForInitialization().timeout(
-        const Duration(seconds: 5), // Reduced timeout to 5 seconds
-        onTimeout: () {
-          print(
-            '⚠️ Time validation initialization timeout in splash screen - proceeding anyway',
-          );
-        },
+      // Check biometric support
+      final canCheckBiometrics = await _localAuth.canCheckBiometrics;
+      if (!canCheckBiometrics) {
+        print('❌ No biometric hardware');
+        _navigateToHome();
+        return;
+      }
+
+      final biometrics = await _localAuth.getAvailableBiometrics();
+      if (biometrics.isEmpty) {
+        print('❌ No biometrics enrolled');
+        _navigateToHome();
+        return;
+      }
+
+      // SIMPLEST VERSION - This should work
+      print('👆 Opening phone fingerprint sensor NOW...');
+      
+      final authenticated = await _localAuth.authenticate(
+        localizedReason: 'Unlock Zero Koin Wallet',
       );
-      print('✅ Time validation initialized successfully in splash screen');
+
+      if (authenticated) {
+        print('✅ Fingerprint authenticated successfully!');
+        _navigateToHome();
+      } else {
+        print('❌ Fingerprint failed or canceled');
+        // Retry after 2 seconds
+        Timer(const Duration(seconds: 2), _triggerPhoneFingerprintSensor);
+      }
     } catch (e) {
-      print(
-        '⚠️ Error initializing time validation in splash screen: $e - proceeding anyway',
-      );
-      // Don't rethrow the error - let the app continue
+      print('❌ Error: $e');
+      _navigateToHome();
     }
   }
 
-  void _checkAuthAndNavigate() async {
-    final authService = AuthService.instance;
-
-    if (authService.isSignedIn) {
-      // User is already signed in, retry time validation with authenticated user
-      try {
-        final timeValidationService = Get.find<TimeValidationService>();
-        await timeValidationService.retryTimeValidation();
-        print('Time validation retried after authentication check');
-      } catch (e) {
-        print('Error retrying time validation: $e');
-      }
-
-      // Go to home screen
-      Get.offAll(() => const BottomBar());
-    } else {
-      // User is not signed in, go to registration screen
-      Get.offAll(() => const UserRegisterationScreen());
-    }
+  void _navigateToHome() {
+    _fingerprintTimer?.cancel();
+    Get.offAll(() => const BottomBar());
   }
 
   @override
   void dispose() {
+    _fingerprintTimer?.cancel();
     _glowController.dispose();
     _zoomController.dispose();
     super.dispose();
@@ -145,7 +128,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Set status bar content to white
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -159,6 +141,7 @@ class _SplashScreenState extends State<SplashScreen>
         fit: StackFit.expand,
         children: [
           Image.asset('assets/Background.jpg', fit: BoxFit.cover),
+          
           Center(
             child: AnimatedBuilder(
               animation: Listenable.merge([
@@ -172,7 +155,7 @@ class _SplashScreenState extends State<SplashScreen>
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Glowing background circle - like your reference
+                      // Glowing background circle
                       Container(
                         width: 200 + _glowAnimation.value * 4,
                         height: 200 + _glowAnimation.value * 4,
@@ -180,14 +163,14 @@ class _SplashScreenState extends State<SplashScreen>
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
                             colors: [
-                              Colors.white.withValues(
-                                alpha: _glowIntensityAnimation.value * 0.3,
+                              Colors.white.withOpacity(
+                                _glowIntensityAnimation.value * 0.3,
                               ),
-                              Colors.white.withValues(
-                                alpha: _glowIntensityAnimation.value * 0.15,
+                              Colors.white.withOpacity(
+                                _glowIntensityAnimation.value * 0.15,
                               ),
-                              Colors.white.withValues(
-                                alpha: _glowIntensityAnimation.value * 0.05,
+                              Colors.white.withOpacity(
+                                _glowIntensityAnimation.value * 0.05,
                               ),
                               Colors.transparent,
                             ],
@@ -195,7 +178,6 @@ class _SplashScreenState extends State<SplashScreen>
                           ),
                         ),
                       ),
-                      // Additional outer glow for more intensity
                       Container(
                         width: 300 + _glowAnimation.value * 6,
                         height: 300 + _glowAnimation.value * 6,
@@ -203,8 +185,8 @@ class _SplashScreenState extends State<SplashScreen>
                           shape: BoxShape.circle,
                           gradient: RadialGradient(
                             colors: [
-                              Colors.white.withValues(
-                                alpha: _glowIntensityAnimation.value * 0.1,
+                              Colors.white.withOpacity(
+                                _glowIntensityAnimation.value * 0.1,
                               ),
                               Colors.transparent,
                             ],
@@ -212,7 +194,6 @@ class _SplashScreenState extends State<SplashScreen>
                           ),
                         ),
                       ),
-                      // The actual logo on top
                       Image.asset(
                         'assets/bluelogo.png',
                         width: 150,
@@ -224,7 +205,7 @@ class _SplashScreenState extends State<SplashScreen>
               },
             ),
           ),
-          // Copyright text at the bottom
+          
           Positioned(
             bottom: 20,
             left: 0,
@@ -236,7 +217,7 @@ class _SplashScreenState extends State<SplashScreen>
                   '© 2025 - 2026 Zero Koin',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
+                    color: Colors.white.withOpacity(0.8),
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
@@ -246,7 +227,7 @@ class _SplashScreenState extends State<SplashScreen>
                   'Tap Learn & Earn',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
+                    color: Colors.white.withOpacity(0.8),
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),

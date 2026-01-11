@@ -22,6 +22,30 @@
           }
         },
         {
+          "client_id": "710512977280-hme6kq8bs6jvhb0t79la5bnc5ij85ru3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zerokoin.zerokoinapp",
+            "certificate_hash": "26b89abd986b574cc991230423fa15c08fb18423"
+          }
+        },
+        {
+          "client_id": "710512977280-jjlj3vugjbpuj012okrbqg8o624aqebg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zerokoin.zerokoinapp",
+            "certificate_hash": "d97bb99b513b33077c6e412af95fa170c21e6f0c"
+          }
+        },
+        {
+          "client_id": "710512977280-oglucl5jic4524gvk6d3oqr9e9v4vjpj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zerokoin.zerokoinapp",
+            "certificate_hash": "a416a80ebb91b6653f02827b10613faca9c597ae"
+          }
+        },
+        {
           "client_id": "710512977280-1r07e4m09tk122ds7qgkqssu28rcj8fi.apps.googleusercontent.com",
           "client_type": 3
         }

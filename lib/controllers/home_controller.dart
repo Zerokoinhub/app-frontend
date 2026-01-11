@@ -7,11 +7,6 @@ class HomeController extends GetxController {
   // Add any other observable variables or initial data loading specific to HomeScreen here
   // For now, we primarily rely on UserController's observables.
 
-  @override
-  void onInit() {
-    super.onInit();
-    // Initial data loading for HomeScreen, if any
-  }
 
   void refreshData() {
     // This method will be called to refresh data on HomeScreen

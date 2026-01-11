@@ -53,7 +53,7 @@ class ApiService {
         return null;
       } else if (response.statusCode == 404) {
         print(
-          'ÄÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂ API endpoint not found: ${baseUrl}/users/sync',
+          'ÄÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂ API endpoint not found: $baseUrl/users/sync',
         );
         print(
           'ĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂ Check if the backend server is running and the route is configured correctly',
@@ -124,7 +124,7 @@ class ApiService {
         return null;
       } else if (response.statusCode == 404) {
         print(
-          'ÄÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂ Profile endpoint not found: ${baseUrl}/users/profile',
+          'ÄÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂ Profile endpoint not found: $baseUrl/users/profile',
         );
         print(
           'ĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂ Check if the endpoint is implemented in the backend or if the server is running',
@@ -237,7 +237,7 @@ class ApiService {
         return data;
       } else if (response.statusCode == 404) {
         print(
-          'ÄÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂ User count endpoint not found: ${baseUrl}/users/count',
+          'ÄÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂ User count endpoint not found: $baseUrl/users/count',
         );
         print(
           'ĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂ Check if the endpoint is implemented in the backend or if the server is running',
@@ -340,7 +340,7 @@ class ApiService {
         }
       } else if (response.statusCode == 404) {
         print(
-          'ÄÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂ Course names endpoint not found: ${baseUrl}/courses/all',
+          'ÄÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂ Course names endpoint not found: $baseUrl/courses/all',
         );
         print(
           'ÄÂĂÂÄÂĂÂĂÂĂÂÄÂĂÂĂÂĂÂÄÂÄšĹž Check if the endpoint is implemented in the backend or if the server is running',
@@ -400,7 +400,7 @@ class ApiService {
         }
       } else if (response.statusCode == 404) {
         print(
-          'ĂÂĂÂÄÂĂÂÄÂĂÂ Course details endpoint not found for $courseName: ${baseUrl}/courses/$courseName',
+          'ĂÂĂÂÄÂĂÂÄÂĂÂ Course details endpoint not found for $courseName: $baseUrl/courses/$courseName',
         );
         print(
           'ĂÂĂÂÄÂĂÂÄÂĂĹž Check if the endpoint is implemented in the backend or if the server is running',

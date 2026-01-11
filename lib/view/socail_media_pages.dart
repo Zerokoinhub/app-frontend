@@ -16,7 +16,7 @@ class SocailMediaPages extends StatefulWidget {
 }
 
 class _SocailMediaPagesState extends State<SocailMediaPages> {
-  List<File> _selectedFiles = [];
+  final List<File> _selectedFiles = [];
 
   Future<void> _pickFiles() async {
     try {

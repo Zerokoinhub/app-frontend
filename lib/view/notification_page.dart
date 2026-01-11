@@ -258,8 +258,9 @@ class NotificationPage extends StatelessWidget {
                                                   child,
                                                   progress,
                                                 ) {
-                                                  if (progress == null)
+                                                  if (progress == null) {
                                                     return child;
+                                                  }
                                                   return Center(
                                                     child: SizedBox(
                                                       width: 20,

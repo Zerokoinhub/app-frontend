@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:zero_koin/controllers/theme_controller.dart';
 import 'package:zero_koin/controllers/user_controller.dart';
-import 'package:zero_koin/view/invite_user_screen.dart';
 import 'package:zero_koin/view/rewards_screen.dart';
 
 import 'package:zero_koin/widgets/app_bar_container.dart';
