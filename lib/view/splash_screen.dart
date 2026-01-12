@@ -25,6 +25,10 @@ class _SplashScreenState extends State<SplashScreen>
   late AdMobController _adMobController;
   final LocalAuthentication _localAuth = LocalAuthentication();
   Timer? _fingerprintTimer;
+  bool _fingerprintDialogOpen = false;
+  bool _fingerprintCompleted = false;
+  int _attemptCount = 0;
+  final int _maxAttempts = 5;
 
   @override
   void initState() {
@@ -67,7 +71,9 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _triggerPhoneFingerprintSensor() async {
-    print('🔐 Opening phone fingerprint sensor after 2 seconds...');
+    if (_fingerprintCompleted || _attemptCount >= _maxAttempts) return;
+    
+    print('🔐 Opening phone fingerprint sensor...');
     
     try {
       // Check if user is logged in
@@ -81,41 +87,101 @@ class _SplashScreenState extends State<SplashScreen>
       final canCheckBiometrics = await _localAuth.canCheckBiometrics;
       if (!canCheckBiometrics) {
         print('❌ No biometric hardware');
-        _navigateToHome();
+        _goToPasswordLogin();
         return;
       }
 
       final biometrics = await _localAuth.getAvailableBiometrics();
       if (biometrics.isEmpty) {
         print('❌ No biometrics enrolled');
-        _navigateToHome();
+        _goToPasswordLogin();
         return;
       }
 
-      // SIMPLEST VERSION - This should work
-      print('👆 Opening phone fingerprint sensor NOW...');
+      // Mark fingerprint dialog as open
+      _fingerprintDialogOpen = true;
+      _attemptCount++;
+
+      print('👆 Attempt $_attemptCount/$_maxAttempts - Opening fingerprint sensor...');
       
       final authenticated = await _localAuth.authenticate(
-        localizedReason: 'Unlock Zero Koin Wallet',
+        localizedReason: 'Scan your fingerprint to unlock Zero Koin',
       );
+
+      // Mark dialog as closed
+      _fingerprintDialogOpen = false;
 
       if (authenticated) {
         print('✅ Fingerprint authenticated successfully!');
+        _fingerprintCompleted = true;
         _navigateToHome();
       } else {
-        print('❌ Fingerprint failed or canceled');
-        // Retry after 2 seconds
-        Timer(const Duration(seconds: 2), _triggerPhoneFingerprintSensor);
+        print('❌ Fingerprint failed or canceled - Attempt $_attemptCount');
+        
+        if (_attemptCount >= _maxAttempts) {
+          print('🛑 Max attempts ($_maxAttempts) reached');
+          _showMaxAttemptsMessage();
+        } else {
+          // Show message and retry after 2 seconds
+          _showRetryMessage();
+          Timer(const Duration(seconds: 2), _triggerPhoneFingerprintSensor);
+        }
       }
     } catch (e) {
       print('❌ Error: $e');
-      _navigateToHome();
+      _fingerprintDialogOpen = false;
+      _goToPasswordLogin();
     }
+  }
+
+  void _showRetryMessage() {
+    if (!mounted) return;
+    
+    // You could show a snackbar or update UI here
+    print('⚠️ Please try again. Attempt $_attemptCount/$_maxAttempts');
+  }
+
+  void _showMaxAttemptsMessage() {
+    print('🛑 Maximum fingerprint attempts reached. Going to password login.');
+    
+    // Wait 2 seconds then go to password
+    Timer(const Duration(seconds: 2), () {
+      _goToPasswordLogin();
+    });
+  }
+
+  void _goToPasswordLogin() {
+    print('🔑 Going to password login');
+    
+    // Disable biometric for current user so they can login with password
+    final currentUser = AuthService.instance.currentUser;
+    if (currentUser != null) {
+      // You might want to clear biometric settings here
+      print('🔄 Biometric disabled for user: ${currentUser.uid}');
+    }
+    
+    Get.offAll(() => const UserRegisterationScreen());
   }
 
   void _navigateToHome() {
     _fingerprintTimer?.cancel();
     Get.offAll(() => const BottomBar());
+  }
+
+  // Prevent back button when fingerprint dialog is open
+  Future<bool> _onWillPop() async {
+    if (_fingerprintDialogOpen) {
+      print('⚠️ Back button blocked - fingerprint dialog is open');
+      
+      // Increment attempt when user tries to go back
+      _attemptCount++;
+      if (_attemptCount >= _maxAttempts) {
+        _showMaxAttemptsMessage();
+      }
+      
+      return false; // Block back button
+    }
+    return true;
   }
 
   @override
@@ -136,106 +202,129 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset('assets/Background.jpg', fit: BoxFit.cover),
-          
-          Center(
-            child: AnimatedBuilder(
-              animation: Listenable.merge([
-                _glowAnimation,
-                _zoomAnimation,
-                _glowIntensityAnimation,
-              ]),
-              builder: (context, child) {
-                return Transform.scale(
-                  scale: _zoomAnimation.value,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Glowing background circle
-                      Container(
-                        width: 200 + _glowAnimation.value * 4,
-                        height: 200 + _glowAnimation.value * 4,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              Colors.white.withOpacity(
-                                _glowIntensityAnimation.value * 0.3,
-                              ),
-                              Colors.white.withOpacity(
-                                _glowIntensityAnimation.value * 0.15,
-                              ),
-                              Colors.white.withOpacity(
-                                _glowIntensityAnimation.value * 0.05,
-                              ),
-                              Colors.transparent,
-                            ],
-                            stops: const [0.0, 0.4, 0.7, 1.0],
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.asset('assets/Background.jpg', fit: BoxFit.cover),
+            
+            Center(
+              child: AnimatedBuilder(
+                animation: Listenable.merge([
+                  _glowAnimation,
+                  _zoomAnimation,
+                  _glowIntensityAnimation,
+                ]),
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _zoomAnimation.value,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Glowing background circle
+                        Container(
+                          width: 200 + _glowAnimation.value * 4,
+                          height: 200 + _glowAnimation.value * 4,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                Colors.white.withOpacity(
+                                  _glowIntensityAnimation.value * 0.3,
+                                ),
+                                Colors.white.withOpacity(
+                                  _glowIntensityAnimation.value * 0.15,
+                                ),
+                                Colors.white.withOpacity(
+                                  _glowIntensityAnimation.value * 0.05,
+                                ),
+                                Colors.transparent,
+                              ],
+                              stops: const [0.0, 0.4, 0.7, 1.0],
+                            ),
                           ),
                         ),
-                      ),
-                      Container(
-                        width: 300 + _glowAnimation.value * 6,
-                        height: 300 + _glowAnimation.value * 6,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: RadialGradient(
-                            colors: [
-                              Colors.white.withOpacity(
-                                _glowIntensityAnimation.value * 0.1,
-                              ),
-                              Colors.transparent,
-                            ],
-                            stops: const [0.0, 1.0],
+                        Container(
+                          width: 300 + _glowAnimation.value * 6,
+                          height: 300 + _glowAnimation.value * 6,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: RadialGradient(
+                              colors: [
+                                Colors.white.withOpacity(
+                                  _glowIntensityAnimation.value * 0.1,
+                                ),
+                                Colors.transparent,
+                              ],
+                              stops: const [0.0, 1.0],
+                            ),
                           ),
                         ),
-                      ),
-                      Image.asset(
-                        'assets/bluelogo.png',
-                        width: 150,
-                        height: 150,
-                      ),
-                    ],
-                  ),
-                );
-              },
+                        Image.asset(
+                          'assets/bluelogo.png',
+                          width: 150,
+                          height: 150,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-          
-          Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '© 2025 - 2026 Zero Koin',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+            
+            Positioned(
+              bottom: 20,
+              left: 0,
+              right: 0,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '© 2025 - 2026 Zero Koin',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Tap Learn & Earn',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Show attempt counter
+            if (_attemptCount > 0 && !_fingerprintCompleted)
+              Positioned(
+                top: 100,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  color: Colors.black.withOpacity(0.5),
+                  child: Text(
+                    'Attempt $_attemptCount/$_maxAttempts',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Tap Learn & Earn',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+              ),
+          ],
+        ),
       ),
     );
   }
